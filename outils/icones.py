@@ -8,8 +8,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(os.path.dirname(HERE), "docs", "icons")
 LAKE = json.load(open(os.path.join(HERE, "data", "lake_pts.json")))
 
-BG = (12, 110, 125)      # bleu-vert du lac (accent de l'app)
-FG = (238, 243, 243)     # silhouette claire
+BG = (46, 122, 123)      # turquoise du Léman (accent de l'app)
+FG = (243, 245, 239)     # silhouette claire
 
 
 def png(path, size, pixels):
