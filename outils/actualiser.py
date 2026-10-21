@@ -6,7 +6,7 @@ Usage : python3 outils/actualiser.py            (récupère les données et reco
 - Si une source ne répond pas, garde les données précédentes de cette zone.
 - Écrit outils/data/zones.json puis reconstruit leman-vivant.html à côté du dossier outils.
 """
-import datetime, json, os, sys, time, urllib.error, urllib.request
+import datetime, json, os, re, sys, time, urllib.error, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "zones.json")
@@ -129,6 +129,59 @@ def build(res):
     print("App web reconstruite :", WEB)
 
 
+# Niveau du lac : station OFEV 2027 « Lac Léman - St-Prex »
+STATION = "https://www.hydrodaten.admin.ch/fr/seen-und-fluesse/stationen-und-daten/2027"
+NIVEAU_40J = "https://www.hydrodaten.admin.ch/plots/p_q_40days/2027_p_q_40days_fr.json"
+# Moyennes mensuelles 1943-2025 publiées par l'OFEV (secours si la page ne répond pas)
+MOYENNES_SECOURS = [372.03, 371.86, 371.68, 371.67, 371.90, 372.18, 372.27, 372.26, 372.24, 372.21, 372.19, 372.14]
+# Niveaux de danger de crue OFEV pour cette station : seuils bas des degrés 2 à 5
+DANGER = [(372.9, 5), (372.65, 4), (372.55, 3), (372.35, 2)]
+
+
+def moyennes_mensuelles():
+    """Lit les 12 moyennes mensuelles sur la page de la station (sinon valeurs de secours)."""
+    try:
+        req = urllib.request.Request(STATION, headers={"User-Agent": "leman-vivant-beta/0.2"})
+        page = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
+        txt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page))
+        m = re.search(r"Moyenne mensuelle((?:\s*\d{3}\.\d{2}\s*m){12})", txt)
+        periode = re.search(r"Période (\d{4}) - (\d{4})", txt)
+        vals = [float(v) for v in re.findall(r"\d{3}\.\d{2}", m.group(1))]
+        return vals, f"{periode.group(1)}–{periode.group(2)}" if periode else "1943–2025"
+    except Exception:
+        return MOYENNES_SECOURS, "1943–2025"
+
+
+def normale_du_jour(moyennes, jour):
+    """Interpole la moyenne du jour entre les moyennes mensuelles (placées au 15 de chaque mois)."""
+    pts = []
+    for annee in (jour.year - 1, jour.year, jour.year + 1):
+        pts += [(datetime.date(annee, i + 1, 15), v) for i, v in enumerate(moyennes)]
+    for (d1, v1), (d2, v2) in zip(pts, pts[1:]):
+        if d1 <= jour <= d2:
+            return v1 + (v2 - v1) * (jour - d1).days / (d2 - d1).days
+
+
+def niveau():
+    d = get(NIVEAU_40J)
+    serie = next(t for t in d["plot"]["data"] if t.get("y"))
+    pts = [(datetime.datetime.fromisoformat(x.replace(".000", "")), y) for x, y in zip(serie["x"], serie["y"]) if y is not None]
+    t_last, last = pts[-1]
+    veille = min(pts, key=lambda p: abs((t_last - p[0]).total_seconds() - 86400))[1]
+    jours = {}
+    for t, y in pts:  # une valeur par jour (moyenne)
+        jours.setdefault(t.date().isoformat(), []).append(y)
+    moyennes, periode = moyennes_mensuelles()
+    normale = normale_du_jour(moyennes, t_last.date())
+    return {
+        "last": round(last, 3), "time": t_last.isoformat(timespec="minutes"),
+        "veille_cm": round((last - veille) * 100, 1),
+        "normale": round(normale, 3), "ecart_cm": round((last - normale) * 100, 1), "periode": periode,
+        "danger": next((n for seuil, n in DANGER if last >= seuil), 1),
+        "jours": [[k, round(sum(v) / len(v), 3)] for k, v in sorted(jours.items())],
+    }
+
+
 def main():
     old = json.load(open(DATA)) if os.path.exists(DATA) else {"zones": {}}
     now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
@@ -149,6 +202,14 @@ def main():
             z["temp"] = prev.get("temp", {})
         res["zones"][zid] = z
         print(zid, "ok", {k: v.get("last") for k, v in z["temp"].items()}, flush=True)
+    try:
+        res["niveau"] = niveau()
+        n = res["niveau"]
+        print(f"niveau ok {n['last']} m, écart {n['ecart_cm']:+} cm à la normale", flush=True)
+    except Exception as e:
+        problems.append(f"niveau du lac : {e}")
+        if old.get("niveau"):
+            res["niveau"] = old["niveau"]
     if any(res["zones"][z].get("total") is None for z, *_ in ZONES):
         sys.exit("Données incomplètes et pas de version précédente : page non reconstruite.")
     y, m, d = res["fetched"][:10].split("-")

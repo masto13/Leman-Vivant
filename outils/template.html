@@ -40,6 +40,10 @@ header.top .lede{color:var(--muted);max-width:60ch;margin-top:10px}
 .fact{padding:12px 20px 12px 0;margin-right:20px;display:grid;gap:2px}
 .fact b{font:500 22px/1.1 var(--mono);font-variant-numeric:tabular-nums}
 .fact span{font-size:12px;color:var(--muted)}
+.fact .lvl{display:flex;align-items:center;gap:8px}
+.fact .lvl svg{display:block}
+.delta{font:500 11px/1 var(--mono);padding:3px 6px;border-radius:4px;border:1px solid var(--line);color:var(--ink);white-space:nowrap}
+.delta.alert{border-color:var(--warn);color:var(--warn)}
 
 .atlas{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
 .mapcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -152,7 +156,7 @@ table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <div class="fact"><b>309 m</b><span>profondeur maximale</span></div>
     <div class="fact"><b>89 km³</b><span>volume d'eau</span></div>
     <div class="fact"><b>≈ 11 ans</b><span>pour renouveler toute l'eau</span></div>
-    <div class="fact"><b>372 m</b><span>altitude du plan d'eau</span></div>
+    <div class="fact" id="fact-niveau"><b>372 m</b><span>altitude du plan d'eau</span></div>
   </div>
 
   <div class="atlas">
@@ -231,6 +235,7 @@ table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
     <b style="color:var(--ink)">Sources et méthode (bêta)</b>
     <ul>
       <li>Température : modèle hydrodynamique Delft3D d'<a href="https://www.alplakes.eawag.ch" target="_blank" rel="noopener">Alplakes (Eawag)</a>, à 1, 10 et 30 m, 7 derniers jours. Valeurs modélisées, pas des mesures directes.</li>
+      <li>Niveau du lac : station « Lac Léman - St-Prex » de l'<a href="https://www.hydrodaten.admin.ch/fr/seen-und-fluesse/stationen-und-daten/2027" target="_blank" rel="noopener">OFEV (hydrodaten.admin.ch)</a>. La normale est la moyenne 1943–2025 pour la date du jour, interpolée entre les moyennes mensuelles.</li>
       <li>Faune : observations du <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> (iNaturalist, ornitho.ch, musées…) dans un rectangle autour de chaque zone, rives comprises. Le nombre d'observations reflète aussi le nombre d'observateurs, pas seulement l'abondance.</li>
       <li>Statut de menace : Liste rouge mondiale de l'UICN via GBIF. Les listes rouges suisse et française peuvent différer.</li>
       <li>Pollution et qualité de l'eau : synthèses de la <a href="https://www.cipel.org" target="_blank" rel="noopener">CIPEL</a>. Qualité de baignade : contrôles des cantons (GE, VD, VS) et, côté France, <a href="https://baignades.sante.gouv.fr" target="_blank" rel="noopener">baignades.sante.gouv.fr</a>.</li>
@@ -479,6 +484,24 @@ document.getElementById("cal").innerHTML = `<thead><tr><th>Période sensible</th
 const th = ids.map(id=>[DATA.zones[id].temp["1"]?.last, DATA.zones[id].temp["30"]?.last]).filter(([a,b])=>a!=null&&b!=null);
 if(th.length){document.getElementById("learn-thermo").textContent = "− "+d3.mean(th,([a,b])=>a-b).toFixed(1).replace(".",",")+" °C";}
 document.getElementById("stamp").textContent = "Données du "+DATA.fetchedFr;
+
+/* ---------- niveau du lac (OFEV, St-Prex) ---------- */
+if (DATA.niveau) {
+  const N = DATA.niveau, f2 = v => v.toFixed(2).replace(".",","), cm = v => (v>0?"+":v<0?"−":"±")+Math.abs(v).toFixed(0)+" cm";
+  const ys = N.jours.map(d=>d[1]), w=72, h=22;
+  const lo = Math.min(...ys, N.normale)-.01, hi = Math.max(...ys, N.normale)+.01;
+  const X = i => i*(w-4)/(ys.length-1)+2, Y = v => h-2-(v-lo)/(hi-lo)*(h-4);
+  const spark = ys.length>1 ? `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <line x1="2" x2="${w-2}" y1="${Y(N.normale)}" y2="${Y(N.normale)}" stroke="var(--muted)" stroke-dasharray="2 2" stroke-width="1"/>
+    <polyline points="${ys.map((v,i)=>X(i)+","+Y(v)).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+    <circle cx="${X(ys.length-1)}" cy="${Y(ys[ys.length-1])}" r="2.4" fill="var(--accent)"/></svg>` : "";
+  const heure = new Date(N.time).toLocaleString("fr-CH",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+  const alerte = N.danger>=2;
+  const el = document.getElementById("fact-niveau");
+  el.title = `Mesure OFEV à St-Prex le ${heure} : ${N.last.toFixed(3)} m. Normale du jour (${N.periode}) : ${N.normale.toFixed(3)} m. Variation sur 24 h : ${cm(N.veille_cm)}. Ligne pointillée : la normale ; courbe : les 40 derniers jours.`;
+  el.innerHTML = `<div class="lvl"><b>${f2(N.last)} m</b>${spark}</div>
+    <span class="lvl"><span class="delta${alerte?" alert":""}">${cm(N.ecart_cm)}</span>${alerte?`niveau de danger de crue ${N.danger}/5`:"niveau du lac, écart à la normale"}</span>`;
+}
 
 /* ---------- ask Claude ---------- */
 const askform=document.getElementById("askform"), askq=document.getElementById("askq"), askbtn=document.getElementById("askbtn"), answer=document.getElementById("answer");
