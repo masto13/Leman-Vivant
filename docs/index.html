@@ -3,7 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Atlas interactif du Léman : température de l'eau, faune, espèces menacées, pollution, plages et périodes de reproduction.">
+<meta name="description" content="Léman Vivant, l'atlas du lac Léman de l'association Le monde des vivants : température de l'eau, niveau du lac, faune, espèces menacées, pollution, plages et périodes de reproduction, actualisés chaque jour.">
+<link rel="canonical" href="https://www.lemondedesvivants.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Le monde des vivants">
+<meta property="og:locale" content="fr_CH">
+<meta property="og:title" content="Léman Vivant · l'atlas vivant du lac Léman">
+<meta property="og:description" content="Température de l'eau, niveau du lac, faune, espèces menacées et zones à respecter, zone par zone et chaque jour.">
+<meta property="og:url" content="https://www.lemondedesvivants.org/">
+<meta property="og:image" content="https://www.lemondedesvivants.org/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#2e7a7b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,7 +24,7 @@
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Léman Vivant</title>
+<title>Léman Vivant · Le monde des vivants</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap">
 <style>
@@ -174,6 +185,59 @@ table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
 .sources b{font:italic 400 17px var(--display);color:var(--ink)}
 .sources ul{margin:0;padding-left:18px;display:grid;gap:5px}
 
+[data-hero]{display:grid;gap:14px}
+/* navigation par onglets */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--sky)}
+.topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--sky) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid color-mix(in srgb,var(--ridge1) 60%,transparent)}
+.topnav-inner{max-width:1180px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:space-between;gap:8px 20px;flex-wrap:wrap}
+.brand{font:italic 400 19px/1 var(--display);color:var(--ink);text-decoration:none;white-space:nowrap}
+.navtabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;max-width:100%}
+.navtabs::-webkit-scrollbar{display:none}
+.navtabs a{font:500 14px/1 var(--body);color:var(--muted);text-decoration:none;padding:9px 12px;border-radius:999px;white-space:nowrap}
+.navtabs a:hover{color:var(--ink)}
+.navtabs a[aria-current="page"]{color:var(--ink);background:var(--surface)}
+.navtabs a:focus-visible,.brand:focus-visible,.btn:focus-visible,.atlas-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.view{display:grid;gap:44px;min-width:0}
+.stack{display:grid;gap:44px}
+
+/* pages L'association et Contact */
+.page{display:grid;gap:40px;max-width:760px}
+.prose{display:grid;gap:12px}
+.prose p,.prose li{color:var(--muted);max-width:66ch}
+.prose p a,.prose li a{color:var(--accent)}
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-top:8px}
+.pillars h3{margin-bottom:4px}
+.pillars p{font-size:15px}
+.atlases{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:4px}
+.atlas-card{display:grid;gap:4px;padding:18px 20px;border-radius:18px;background:var(--surface);box-shadow:0 1px 0 var(--line);text-decoration:none;color:var(--ink)}
+.atlas-card b{font:400 24px/1.1 var(--display)}
+.atlas-card span{color:var(--muted);font-size:14.5px}
+.atlas-card .status{font:italic 15px var(--display);color:var(--accent)}
+a.atlas-card:hover{box-shadow:0 1px 0 var(--line),0 12px 28px -20px rgba(30,60,55,.45)}
+.atlas-card.soon{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.atlas-card.soon .status{color:var(--muted)}
+.sources-list{margin:0;padding-left:18px;display:grid;gap:8px;font-size:14.5px}
+
+.mailbox{display:grid;gap:10px;padding:26px 24px;border-radius:18px;background:var(--surface);box-shadow:0 1px 0 var(--line),0 12px 32px -22px rgba(30,60,55,.35)}
+.address{font:400 clamp(24px,5vw,38px)/1.15 var(--display);color:var(--ink);overflow-wrap:anywhere;user-select:all}
+.mail-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+a.btn{text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--line)}
+.copied{font:italic 15px var(--display);color:var(--accent)}
+.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:-20px}
+.topic{display:grid;gap:6px;align-content:start;padding:18px 20px;border-radius:18px;background:var(--surface);box-shadow:0 1px 0 var(--line);text-decoration:none;color:var(--ink)}
+.topic b{font:400 21px/1.15 var(--display)}
+.topic span{color:var(--muted);font-size:14.5px}
+.topic em{font:italic 15px var(--display);color:var(--accent);margin-top:4px}
+.topic:hover{box-shadow:0 1px 0 var(--line),0 12px 28px -20px rgba(30,60,55,.45)}
+.topic:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.site-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;border-top:1px solid var(--line);padding-top:20px;font-size:13.5px;color:var(--muted)}
+.site-foot b{font:italic 400 16px var(--display);color:var(--ink)}
+.site-foot a{color:var(--muted)}
+body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
+@media (max-width:640px){.topnav-inner{padding-block:8px 6px}.navtabs{width:100%;margin-inline:-6px;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent);padding-right:28px}.navtabs a{padding:8px 10px;font-size:13.5px}}
+
 @media (max-width:900px){.atlas{grid-template-columns:1fr}}
 @media (max-width:520px){.hero-inner{padding-block:28px 120px}.hero svg.alps{height:140px}.facts{gap:14px 28px}.fact b{font-size:25px}.bar{grid-template-columns:80px 1fr 58px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -182,58 +246,85 @@ table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
 <body>
 
 
+<nav class="topnav" aria-label="Navigation principale">
+  <div class="topnav-inner">
+    <a class="brand" href="#carte">Le monde des vivants</a>
+    <div class="navtabs">
+      <a href="#carte" data-nav="carte">Léman Vivant</a>
+      <a href="#calendrier" data-nav="calendrier">Calendrier</a>
+      <a href="#comprendre" data-nav="comprendre">Comprendre</a>
+      <a href="#association" data-nav="association">L'association</a>
+      <a href="#contact" data-nav="contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
 <header class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">Carnet de terrain · le lac Léman</div>
-    <h1>Léman Vivant<span class="beta">bêta</span></h1>
-    <p class="lede">Explorez le lac zone par zone : qui y vit, quelles espèces sont menacées, la température de l'eau à plusieurs profondeurs, où se baigner et quels secteurs laisser tranquilles pendant la reproduction.</p>
-    <p class="stamp" id="stamp"></p>
+    <div data-hero="leman">
+      <div class="eyebrow">Un atlas de l'association Le monde des vivants</div>
+      <h1>Léman Vivant<span class="beta">bêta</span></h1>
+      <p class="lede">Explorez le lac zone par zone : qui y vit, quelles espèces sont menacées, la température de l'eau à plusieurs profondeurs, où se baigner et quels secteurs laisser tranquilles pendant la reproduction.</p>
+      <p class="stamp" id="stamp"></p>
+    </div>
+    <div data-hero="association" hidden>
+      <div class="eyebrow">L'association</div>
+      <h1>Le monde des vivants</h1>
+      <p class="lede">Faire connaître la vie de nos lacs, des poissons des grands fonds aux oiseaux des roselières, et donner à chacun l'envie de la protéger.</p>
+    </div>
+    <div data-hero="contact" hidden>
+      <div class="eyebrow">Contact</div>
+      <h1>Écrivez-nous</h1>
+      <p class="lede">Une question, une observation, l'envie de rejoindre l'association ou de travailler avec nous : nous lisons tous les messages.</p>
+    </div>
   </div>
   <svg class="alps" id="alps" viewBox="0 0 1440 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
 </header>
 
 <div class="wrap">
-  <div class="facts" aria-label="Le Léman en chiffres">
-    <div class="fact"><b>580 km²</b><span>surface, plus grand lac d'Europe occidentale</span></div>
-    <div class="fact"><b>309 m</b><span>profondeur maximale</span></div>
-    <div class="fact"><b>89 km³</b><span>volume d'eau</span></div>
-    <div class="fact"><b>≈ 11 ans</b><span>pour renouveler toute l'eau</span></div>
-    <div class="fact" id="fact-niveau"><b>372 m</b><span>altitude du plan d'eau</span></div>
-  </div>
-
-  <div class="atlas">
-    <div class="mapcard">
-      <div class="layers" role="group" aria-label="Couches de la carte">
-        <button class="chip" data-layer="temp" aria-pressed="true"><i></i>Température</button>
-        <button class="chip" data-layer="bio" aria-pressed="false"><i></i>Biodiversité</button>
-        <button class="chip" data-overlay="beaches" aria-pressed="true"><i></i>Plages</button>
-        <button class="chip" data-overlay="reserves" aria-pressed="true"><i></i>Zones sensibles</button>
-      </div>
-      <div class="mapbox" id="mapbox">
-        <svg class="map" id="map" role="img" aria-label="Carte du Léman découpée en zones"></svg>
-        <div class="tip" id="tip" hidden></div>
-      </div>
-      <div class="legend" id="legend"></div>
+  <section class="view" data-view="carte" aria-label="Léman Vivant">
+    <div class="facts" aria-label="Le Léman en chiffres">
+      <div class="fact"><b>580 km²</b><span>surface, plus grand lac d'Europe occidentale</span></div>
+      <div class="fact"><b>309 m</b><span>profondeur maximale</span></div>
+      <div class="fact"><b>89 km³</b><span>volume d'eau</span></div>
+      <div class="fact"><b>≈ 11 ans</b><span>pour renouveler toute l'eau</span></div>
+      <div class="fact" id="fact-niveau"><b>372 m</b><span>altitude du plan d'eau</span></div>
     </div>
 
-    <aside class="sheet" aria-live="polite">
-      <div class="sheet-head">
-        <div class="eyebrow" id="z-eyebrow"></div>
-        <h2 id="z-name"></h2>
-        <p id="z-desc"></p>
+    <div class="atlas">
+      <div class="mapcard">
+        <div class="layers" role="group" aria-label="Couches de la carte">
+          <button class="chip" data-layer="temp" aria-pressed="true"><i></i>Température</button>
+          <button class="chip" data-layer="bio" aria-pressed="false"><i></i>Biodiversité</button>
+          <button class="chip" data-overlay="beaches" aria-pressed="true"><i></i>Plages</button>
+          <button class="chip" data-overlay="reserves" aria-pressed="true"><i></i>Zones sensibles</button>
+        </div>
+        <div class="mapbox" id="mapbox">
+          <svg class="map" id="map" role="img" aria-label="Carte du Léman découpée en zones"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <div class="legend" id="legend"></div>
       </div>
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" data-tab="eau" aria-selected="true">Eau</button>
-        <button class="tab" role="tab" data-tab="faune" aria-selected="false">Faune</button>
-        <button class="tab" role="tab" data-tab="menaces" aria-selected="false">Espèces menacées</button>
-        <button class="tab" role="tab" data-tab="pollution" aria-selected="false">Pollution</button>
-        <button class="tab" role="tab" data-tab="visiter" aria-selected="false">Visiter</button>
-      </div>
-      <div class="pane" id="pane"></div>
-    </aside>
-  </div>
 
-  <section class="block" id="calendrier">
+      <aside class="sheet" aria-live="polite">
+        <div class="sheet-head">
+          <div class="eyebrow" id="z-eyebrow"></div>
+          <h2 id="z-name"></h2>
+          <p id="z-desc"></p>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" data-tab="eau" aria-selected="true">Eau</button>
+          <button class="tab" role="tab" data-tab="faune" aria-selected="false">Faune</button>
+          <button class="tab" role="tab" data-tab="menaces" aria-selected="false">Espèces menacées</button>
+          <button class="tab" role="tab" data-tab="pollution" aria-selected="false">Pollution</button>
+          <button class="tab" role="tab" data-tab="visiter" aria-selected="false">Visiter</button>
+        </div>
+        <div class="pane" id="pane"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="view block" data-view="calendrier" hidden>
     <header>
       <div class="eyebrow">Respecter la reproduction</div>
       <h2>Quand laisser certaines zones tranquilles</h2>
@@ -242,47 +333,118 @@ table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
     <div class="cal-wrap"><table class="cal" id="cal"></table></div>
   </section>
 
-  <section class="block">
-    <header>
-      <div class="eyebrow">Comprendre</div>
-      <h2>Ce qui se passe sous la surface</h2>
-    </header>
-    <div class="learn">
-      <article><span class="big" id="learn-thermo">—</span><h3>La thermocline</h3><p>En été et en automne, l'eau chaude flotte sur l'eau froide. Entre 10 et 30 m de profondeur, la température chute brutalement. Les chiffres en direct ci-dessus le montrent : comparez 1 m et 30 m.</p></article>
-      <article><span class="big">÷ 5</span><h3>Le phosphore a reculé</h3><p>Dans les années 1970, les rejets de phosphates (lessives, eaux usées) ont fait exploser les algues. Grâce aux stations d'épuration et à l'interdiction des phosphates dans les lessives, la concentration a été divisée par environ cinq depuis le pic de 1979.</p></article>
-      <article><span class="big">O₂</span><h3>Le fond manque d'oxygène</h3><p>Pour oxygéner les grands fonds, l'eau doit se mélanger de haut en bas en hiver. Avec des hivers plus doux, ce brassage complet devient rare : le dernier date de 2012.</p></article>
-      <article><span class="big">2015</span><h3>La moule quagga</h3><p>Arrivée vers 2015, cette petite moule invasive tapisse désormais les fonds par milliards. Elle filtre l'eau, bouche les conduites et modifie toute la chaîne alimentaire. Nettoyez et séchez votre bateau ou votre paddle avant de changer de lac.</p></article>
-      <article><span class="big">µg</span><h3>Micropolluants et plastiques</h3><p>Résidus de médicaments, pesticides, PFAS et microplastiques sont détectés dans le lac. Ils viennent des eaux usées, de l'agriculture, des routes et du Rhône. Les stations d'épuration s'équipent progressivement pour les traiter.</p></article>
-      <article><span class="big">Rhône</span><h3>Un lac nourri par les glaciers</h3><p>Le Rhône apporte la majeure partie de l'eau du lac. Froid et chargé de sédiments glaciaires, il plonge sous l'eau du lac en arrivant à Villeneuve et crée un canyon sous-lacustre.</p></article>
+  <section class="view" data-view="comprendre" hidden>
+    <div class="stack">
+      <section class="block">
+        <header>
+          <div class="eyebrow">Comprendre</div>
+          <h2>Ce qui se passe sous la surface</h2>
+        </header>
+        <div class="learn">
+          <article><span class="big" id="learn-thermo">—</span><h3>La thermocline</h3><p>En été et en automne, l'eau chaude flotte sur l'eau froide. Entre 10 et 30 m de profondeur, la température chute brutalement. Les chiffres du jour, dans l'onglet Léman Vivant, le montrent : comparez 1 m et 30 m.</p></article>
+          <article><span class="big">÷ 5</span><h3>Le phosphore a reculé</h3><p>Dans les années 1970, les rejets de phosphates (lessives, eaux usées) ont fait exploser les algues. Grâce aux stations d'épuration et à l'interdiction des phosphates dans les lessives, la concentration a été divisée par environ cinq depuis le pic de 1979.</p></article>
+          <article><span class="big">O₂</span><h3>Le fond manque d'oxygène</h3><p>Pour oxygéner les grands fonds, l'eau doit se mélanger de haut en bas en hiver. Avec des hivers plus doux, ce brassage complet devient rare : le dernier date de 2012.</p></article>
+          <article><span class="big">2015</span><h3>La moule quagga</h3><p>Arrivée vers 2015, cette petite moule invasive tapisse désormais les fonds par milliards. Elle filtre l'eau, bouche les conduites et modifie toute la chaîne alimentaire. Nettoyez et séchez votre bateau ou votre paddle avant de changer de lac.</p></article>
+          <article><span class="big">µg</span><h3>Micropolluants et plastiques</h3><p>Résidus de médicaments, pesticides, PFAS et microplastiques sont détectés dans le lac. Ils viennent des eaux usées, de l'agriculture, des routes et du Rhône. Les stations d'épuration s'équipent progressivement pour les traiter.</p></article>
+          <article><span class="big">Rhône</span><h3>Un lac nourri par les glaciers</h3><p>Le Rhône apporte la majeure partie de l'eau du lac. Froid et chargé de sédiments glaciaires, il plonge sous l'eau du lac en arrivant à Villeneuve et crée un canyon sous-lacustre.</p></article>
+        </div>
+      </section>
+
+      <section class="block" id="ask">
+        <header>
+          <div class="eyebrow">Poser une question</div>
+          <h2>Demandez au lac</h2>
+          <p>Une question sur la zone sélectionnée, une espèce ou le fonctionnement du lac ? La réponse s'appuie sur les données de cette page.</p>
+        </header>
+        <div class="ask">
+          <form id="askform">
+            <input id="askq" type="text" placeholder="Ex. : Pourquoi l'eau est-elle si froide à 30 m ?" aria-label="Votre question">
+            <button class="btn" id="askbtn" type="submit">Demander</button>
+          </form>
+          <div class="suggest" id="suggest"></div>
+          <div class="answer" id="answer"></div>
+        </div>
+      </section>
     </div>
   </section>
 
-  <section class="block" id="ask">
-    <header>
-      <div class="eyebrow">Poser une question</div>
-      <h2>Demandez au lac</h2>
-      <p>Une question sur la zone sélectionnée, une espèce ou le fonctionnement du lac ? La réponse s'appuie sur les données de cette page.</p>
-    </header>
-    <div class="ask">
-      <form id="askform">
-        <input id="askq" type="text" placeholder="Ex. : Pourquoi l'eau est-elle si froide à 30 m ?" aria-label="Votre question">
-        <button class="btn" id="askbtn" type="submit">Demander</button>
-      </form>
-      <div class="suggest" id="suggest"></div>
-      <div class="answer" id="answer"></div>
+  <section class="view" data-view="association" hidden>
+    <div class="page">
+      <section class="prose">
+        <h2>Notre mission</h2>
+        <p>Nos lacs sont des mondes entiers, souvent invisibles depuis la rive. Le monde des vivants rassemble ce que l'on sait d'eux et le rend lisible par tous : promeneurs, baigneurs, pêcheurs, élèves, élus.</p>
+        <div class="pillars">
+          <div><h3>Comprendre</h3><p>Température, niveau, faune, pollution : des données publiques, réunies et expliquées simplement.</p></div>
+          <div><h3>Observer sans déranger</h3><p>Savoir où et quand la vie se reproduit, pour profiter du lac sans la mettre en danger.</p></div>
+          <div><h3>Protéger</h3><p>Donner à chacun les clés pour agir : signaler, participer, soutenir.</p></div>
+        </div>
+      </section>
+
+      <section class="prose">
+        <h2>Nos atlas</h2>
+        <p>Chaque lac a son propre atlas, avec son nom.</p>
+        <div class="atlases">
+          <a class="atlas-card" href="#carte"><span class="status">En ligne</span><b>Léman Vivant</b><span>Le lac Léman, de Genève au delta du Rhône.</span></a>
+          <div class="atlas-card soon"><span class="status">En préparation</span><b>D'autres lacs</b><span>Les prochains atlas suivront, chacun sous son propre nom.</span></div>
+        </div>
+      </section>
+
+      <section class="prose">
+        <h2>Rejoindre et soutenir</h2>
+        <p>L'association est en cours de création. Bénévoles, naturalistes, enseignants, photographes, développeurs : toutes les envies sont les bienvenues. Pour être tenu au courant de sa fondation ou proposer votre aide, <a href="#contact">écrivez-nous</a>.</p>
+      </section>
+
+      <section class="prose" id="sources">
+        <h2>Sources et méthode</h2>
+        <ul class="sources-list">
+          <li>Température : modèle hydrodynamique Delft3D d'<a href="https://www.alplakes.eawag.ch" target="_blank" rel="noopener">Alplakes (Eawag)</a>, à 1, 10 et 30 m, 7 derniers jours. Valeurs modélisées, pas des mesures directes.</li>
+          <li>Niveau du lac : station « Lac Léman - St-Prex » de l'<a href="https://www.hydrodaten.admin.ch/fr/seen-und-fluesse/stationen-und-daten/2027" target="_blank" rel="noopener">OFEV (hydrodaten.admin.ch)</a>. La normale est la moyenne 1943–2025 pour la date du jour, interpolée entre les moyennes mensuelles.</li>
+          <li>Faune : observations du <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> (iNaturalist, ornitho.ch, musées…) dans un rectangle autour de chaque zone, rives comprises. Le nombre d'observations reflète aussi le nombre d'observateurs, pas seulement l'abondance.</li>
+          <li>Statut de menace : Liste rouge mondiale de l'UICN via GBIF. Les listes rouges suisse et française peuvent différer.</li>
+          <li>Pollution et qualité de l'eau : synthèses de la <a href="https://www.cipel.org" target="_blank" rel="noopener">CIPEL</a>. Qualité de baignade : contrôles des cantons (GE, VD, VS) et, côté France, <a href="https://baignades.sante.gouv.fr" target="_blank" rel="noopener">baignades.sante.gouv.fr</a>.</li>
+          <li>Contour du lac : © contributeurs OpenStreetMap. Plages, réserves et périodes : positions et dates indicatives.</li>
+          <li>Les données sont actualisées automatiquement chaque matin.</li>
+        </ul>
+      </section>
+
+      <section class="prose" id="confidentialite">
+        <h2>Confidentialité</h2>
+        <p>Ce site ne demande aucun compte, ne dépose aucun cookie, n'affiche aucune publicité et ne mesure pas votre navigation. Il retient seulement, sur votre appareil, la dernière zone du lac que vous avez consultée.</p>
+        <p>Pour fonctionner, la page charge ses polices depuis Google Fonts et une bibliothèque de graphiques depuis cdnjs (Cloudflare). Le site est hébergé par GitHub Pages. Comme tout hébergeur, ces services reçoivent votre adresse IP lorsqu'ils vous envoient leurs fichiers.</p>
+        <p>Si vous nous écrivez, votre message et votre adresse e-mail servent uniquement à vous répondre.</p>
+      </section>
+
+      <section class="prose">
+        <h2>Mentions légales</h2>
+        <p>Éditeur : association Le monde des vivants (en cours de constitution). Contact : <a href="#contact">contact@lemondedesvivants.org</a>. Hébergement : GitHub Pages, GitHub Inc., San Francisco, États-Unis.</p>
+      </section>
     </div>
   </section>
 
-  <footer class="sources">
-    <b style="color:var(--ink)">Sources et méthode (bêta)</b>
-    <ul>
-      <li>Température : modèle hydrodynamique Delft3D d'<a href="https://www.alplakes.eawag.ch" target="_blank" rel="noopener">Alplakes (Eawag)</a>, à 1, 10 et 30 m, 7 derniers jours. Valeurs modélisées, pas des mesures directes.</li>
-      <li>Niveau du lac : station « Lac Léman - St-Prex » de l'<a href="https://www.hydrodaten.admin.ch/fr/seen-und-fluesse/stationen-und-daten/2027" target="_blank" rel="noopener">OFEV (hydrodaten.admin.ch)</a>. La normale est la moyenne 1943–2025 pour la date du jour, interpolée entre les moyennes mensuelles.</li>
-      <li>Faune : observations du <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> (iNaturalist, ornitho.ch, musées…) dans un rectangle autour de chaque zone, rives comprises. Le nombre d'observations reflète aussi le nombre d'observateurs, pas seulement l'abondance.</li>
-      <li>Statut de menace : Liste rouge mondiale de l'UICN via GBIF. Les listes rouges suisse et française peuvent différer.</li>
-      <li>Pollution et qualité de l'eau : synthèses de la <a href="https://www.cipel.org" target="_blank" rel="noopener">CIPEL</a>. Qualité de baignade : contrôles des cantons (GE, VD, VS) et, côté France, <a href="https://baignades.sante.gouv.fr" target="_blank" rel="noopener">baignades.sante.gouv.fr</a>.</li>
-      <li>Contour du lac : © contributeurs OpenStreetMap. Plages, réserves et périodes : positions et dates indicatives.</li>
-    </ul>
+  <section class="view" data-view="contact" hidden>
+    <div class="page">
+      <div class="mailbox">
+        <span class="eyebrow">Notre adresse</span>
+        <div class="address" id="address">contact@lemondedesvivants.org</div>
+        <div class="mail-actions">
+          <a class="btn" href="mailto:contact@lemondedesvivants.org">Écrire un e-mail</a>
+          <button class="btn ghost" id="copy" type="button">Copier l'adresse</button>
+          <span class="copied" id="copied" role="status"></span>
+        </div>
+      </div>
+
+      <section class="prose">
+        <h2>À quel sujet ?</h2>
+        <p>Choisissez un sujet : votre messagerie s'ouvre avec un e-mail prêt à compléter.</p>
+      </section>
+      <div class="topics" id="topics"></div>
+      <p class="note">Si le bouton n'ouvre pas votre messagerie, copiez l'adresse ci-dessus et écrivez-nous depuis votre boîte habituelle.</p>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <span><b>Le monde des vivants</b> · association en cours de création</span>
+    <span><a href="#contact">contact@lemondedesvivants.org</a> · <a href="#association">Sources, confidentialité et mentions légales</a></span>
   </footer>
 </div>
 
@@ -613,6 +775,56 @@ if(!window.claude?.use) document.getElementById("ask").hidden = true; // hors de
     <path class="r3" d="${ridge(777, 150, 26, 0.5)}"/>
     <rect class="lake" x="0" y="150" width="${W}" height="40"/>${ripples}`;
 })();
+
+/* ---------- onglets du site ---------- */
+const VIEWS = ["carte", "calendrier", "comprendre", "association", "contact"];
+const HERO_OF = {carte: "leman", calendrier: "leman", comprendre: "leman", association: "association", contact: "contact"};
+function showView(v, scroll) {
+  if (!VIEWS.includes(v)) v = "carte";
+  document.body.dataset.now = v;
+  document.querySelectorAll("[data-view]").forEach(s => s.hidden = s.dataset.view !== v);
+  document.querySelectorAll("[data-hero]").forEach(h => h.hidden = h.dataset.hero !== HERO_OF[v]);
+  document.querySelectorAll("[data-nav]").forEach(a => a.dataset.nav === v ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  const cur = document.querySelector(`[data-nav="${v}"]`);
+  cur?.scrollIntoView?.({block: "nearest", inline: "nearest"});
+  if (scroll) window.scrollTo(0, 0);
+}
+addEventListener("hashchange", () => showView(location.hash.slice(1), true));
+document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
+  const v = a.getAttribute("href").slice(1);
+  if (VIEWS.includes(v) && location.hash.slice(1) === v) { e.preventDefault(); showView(v, true); }
+}));
+
+/* ---------- page Contact ---------- */
+const MAIL = "contact@lemondedesvivants.org";
+const TOPICS = [
+  {t: "Rejoindre l'association", d: "Bénévole, naturaliste, enseignant, photographe, développeur… dites-nous ce qui vous donne envie.",
+   s: "Rejoindre Le monde des vivants", b: "Bonjour,\n\nJ'aimerais rejoindre l'association.\n\nCe qui m'intéresse : \nCe que je peux apporter : \nOù j'habite : \n\nMerci !"},
+  {t: "Signaler une observation ou une erreur", d: "Une espèce vue au bord du lac, une donnée qui vous semble fausse, une plage manquante.",
+   s: "Observation ou correction pour Léman Vivant", b: "Bonjour,\n\nZone ou lieu concerné : \nDate : \nCe que j'ai observé ou ce qui me semble erroné : \n\n"},
+  {t: "Presse et médias", d: "Article, reportage, interview : nous répondons volontiers aux journalistes.",
+   s: "Demande presse – Le monde des vivants", b: "Bonjour,\n\nMédia : \nSujet : \nÉchéance : \n\n"},
+  {t: "Partenariat", d: "Écoles, chercheurs, communes, associations, entreprises : construisons quelque chose ensemble.",
+   s: "Proposition de partenariat", b: "Bonjour,\n\nOrganisation : \nNotre idée : \n\n"},
+  {t: "Soutenir le projet", d: "L'association ouvrira bientôt la possibilité de faire un don. Écrivez-nous pour être prévenu.",
+   s: "Soutenir Le monde des vivants", b: "Bonjour,\n\nJ'aimerais soutenir l'association. Prévenez-moi quand les dons seront possibles.\n\n"},
+  {t: "Autre chose", d: "Une question, une idée, un encouragement : tout est bienvenu.",
+   s: "Message pour Le monde des vivants", b: "Bonjour,\n\n"},
+];
+document.getElementById("topics").innerHTML = TOPICS.map(x =>
+  `<a class="topic" href="mailto:${MAIL}?subject=${encodeURIComponent(x.s)}&body=${encodeURIComponent(x.b)}"><b>${x.t}</b><span>${x.d}</span><em>Écrire à ce sujet</em></a>`).join("");
+document.getElementById("copy").addEventListener("click", async () => {
+  const out = document.getElementById("copied");
+  try { await navigator.clipboard.writeText(MAIL); out.textContent = "Adresse copiée"; }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById("address"));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    out.textContent = "Adresse sélectionnée : copiez-la avec Cmd+C ou Ctrl+C";
+  }
+  setTimeout(() => out.textContent = "", 4000);
+});
+
+showView(location.hash.slice(1), false);
 
 /* ---------- boot ---------- */
 let start="lausanne"; try{const s=localStorage.getItem("leman-zone"); if(s&&ZONES[s]) start=s;}catch(e){}

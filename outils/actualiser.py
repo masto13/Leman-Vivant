@@ -94,7 +94,18 @@ WEB_HEAD = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Atlas interactif du Léman : température de l'eau, faune, espèces menacées, pollution, plages et périodes de reproduction.">
+<meta name="description" content="Léman Vivant, l'atlas du lac Léman de l'association Le monde des vivants : température de l'eau, niveau du lac, faune, espèces menacées, pollution, plages et périodes de reproduction, actualisés chaque jour.">
+<link rel="canonical" href="https://www.lemondedesvivants.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Le monde des vivants">
+<meta property="og:locale" content="fr_CH">
+<meta property="og:title" content="Léman Vivant · l'atlas vivant du lac Léman">
+<meta property="og:description" content="Température de l'eau, niveau du lac, faune, espèces menacées et zones à respecter, zone par zone et chaque jour.">
+<meta property="og:url" content="https://www.lemondedesvivants.org/">
+<meta property="og:image" content="https://www.lemondedesvivants.org/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#2e7a7b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -124,6 +135,7 @@ def build(res):
     # App web : titre, polices et styles dans <head>, le reste dans <body>
     cut = page.index("</style>") + len("</style>")
     head = page[:cut].replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
+    head = head.replace("<title>Léman Vivant</title>", "<title>Léman Vivant · Le monde des vivants</title>")
     os.makedirs(os.path.dirname(WEB), exist_ok=True)
     open(WEB, "w").write(WEB_HEAD + head + "\n</head>\n<body>\n" + page[cut:] + "\n" + WEB_FOOT)
     print("App web reconstruite :", WEB)
