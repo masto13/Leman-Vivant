@@ -1,0 +1,39 @@
+name: Actualiser les données
+
+on:
+  schedule:
+    - cron: "15 4 * * *"   # chaque jour à 04:15 UTC (6 h 15 en été, 5 h 15 en hiver en Suisse)
+  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualiser
+  cancel-in-progress: false
+
+jobs:
+  actualiser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Récupérer les données et reconstruire le site
+        run: python3 outils/actualiser.py
+
+      - name: Enregistrer les nouvelles données
+        run: |
+          git config user.name "leman-vivant-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/index.html leman-vivant.html outils/data/zones.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement."
+          else
+            git commit -m "Données du $(date -u +%Y-%m-%d)"
+            git push
+          fi

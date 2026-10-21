@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Atlas interactif du Léman : température de l'eau, faune, espèces menacées, pollution, plages et périodes de reproduction.">
+<meta name="theme-color" content="#0c6e7d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Léman">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Léman Vivant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an atlas — the lake map is the page's spine, a zone sheet sits beside it, learning sections follow below */
+:root{
+  --bg:#eef3f3; --surface:#ffffff; --ink:#0f2a33; --muted:#4f6a72; --line:#cfdcde;
+  --water:#9fc9d3; --water-deep:#2f7d8f; --land:#e3e8e2; --accent:#0c6e7d; --accent-ink:#ffffff;
+  --sun:#c4791a; --warn:#b4552b; --ok:#2e7d4f; --cr:#a3242d; --en:#c4552b; --vu:#c4911a; --nt:#7b8f2e;
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --t1:15.0; --t2:16.4;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1a1f; --surface:#112830; --ink:#e3eef0; --muted:#93acb3; --line:#23434c;
+  --water:#1d4f5c; --water-deep:#5fb3c4; --land:#15262b; --accent:#5fc1cf; --accent-ink:#06262c;
+  --sun:#e8a24a; --warn:#e58a5f; --ok:#6cc48e; --cr:#ff6b74; --en:#f08a5d; --vu:#e8bb4a; --nt:#a9c25a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1a1f; --surface:#112830; --ink:#e3eef0; --muted:#93acb3; --line:#23434c;
+  --water:#1d4f5c; --water-deep:#5fb3c4; --land:#15262b; --accent:#5fc1cf; --accent-ink:#06262c;
+  --sun:#e8a24a; --warn:#e58a5f; --ok:#6cc48e; --cr:#ff6b74; --en:#f08a5d; --vu:#e8bb4a; --nt:#a9c25a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:-.005em}
+h1{font-size:clamp(30px,5vw,46px);line-height:1.05}
+h2{font-size:26px;line-height:1.15}
+h3{font-size:18px}
+p{margin:0}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+.beta{display:inline-block;font:500 11px/1 var(--mono);letter-spacing:.08em;padding:4px 7px;border:1px solid var(--accent);color:var(--accent);border-radius:4px;vertical-align:middle;margin-left:8px}
+
+header.top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end}
+header.top .lede{color:var(--muted);max-width:60ch;margin-top:10px}
+.facts{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fact{padding:12px 20px 12px 0;margin-right:20px;display:grid;gap:2px}
+.fact b{font:500 22px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.fact span{font-size:12px;color:var(--muted)}
+
+.atlas{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
+.mapcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.layers{display:flex;flex-wrap:wrap;gap:6px;padding:12px;border-bottom:1px solid var(--line)}
+.chip{font:600 13px/1 var(--body);padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] i{background:var(--accent-ink)}
+.chip:focus-visible,button:focus-visible,.zone:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.mapbox{position:relative;background:var(--land)}
+svg.map{display:block;width:100%;height:auto}
+.lake-shadow{fill:none;stroke:var(--water-deep);stroke-width:2.2;opacity:.55}
+.zone{cursor:pointer;stroke:var(--surface);stroke-width:1.4;transition:opacity .15s}
+.zone:hover{opacity:.82}
+.zone.sel{stroke:var(--ink);stroke-width:2.4}
+.zlabel{font:600 10.5px var(--body);fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.town{font:500 9.5px var(--body);fill:var(--muted)}
+.town-dot{fill:var(--muted)}
+.country{font:500 10px var(--mono);letter-spacing:.2em;fill:var(--muted);opacity:.7}
+.beach{fill:var(--sun);stroke:var(--surface);stroke-width:1.5;cursor:pointer}
+.reserve{fill:var(--warn);fill-opacity:.2;stroke:var(--warn);stroke-width:1.4;stroke-dasharray:3 2;cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:10px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.ramp{width:140px;height:8px;border-radius:4px}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:6px;max-width:220px;transform:translate(-50%,-115%);white-space:normal}
+
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:grid;min-width:0}
+.sheet-head{padding:18px 18px 12px;display:grid;gap:6px;border-bottom:1px solid var(--line)}
+.sheet-head p{color:var(--muted);font-size:14px}
+.tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{font:600 13px var(--body);padding:11px 9px;border:0;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.pane{padding:16px 18px 18px;display:grid;gap:14px;min-width:0}
+.temps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.temp{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:2px}
+.temp b{font:500 22px/1 var(--mono)}
+.temp span{font-size:11.5px;color:var(--muted)}
+.spark{width:100%;height:auto;display:block}
+.spark text{font:10px var(--mono);fill:var(--muted)}
+.list{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.list li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.sp-name{font-weight:600}
+.sp-sci{font-style:italic;color:var(--muted);font-size:12.5px}
+.iucn{font:600 11px/1 var(--mono);padding:4px 6px;border-radius:4px;min-width:28px;text-align:center}
+.iucn.CR{background:var(--cr)}.iucn.EN{background:var(--en)}.iucn.VU{background:var(--vu)}.iucn.NT{background:var(--nt)}.iucn.LC{background:var(--muted)}
+:root .iucn{color:var(--surface)}
+.n{font:12px var(--mono);color:var(--muted)}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;font-size:13px}
+.bar .track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px}
+.bar .n{text-align:right}
+.note{font-size:12.5px;color:var(--muted);border-left:2px solid var(--line);padding-left:10px}
+.pressure{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.pressure li{display:grid;grid-template-columns:10px 1fr;gap:10px;align-items:baseline}
+.pressure li::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--warn);transform:translateY(1px)}
+.place{display:grid;gap:3px;padding:10px 0;border-bottom:1px solid var(--line)}
+.place:last-child{border-bottom:0}
+.tag{font:500 11px var(--mono);color:var(--muted)}
+
+section.block{display:grid;gap:14px}
+section.block > header{display:grid;gap:6px}
+section.block > header p{color:var(--muted);max-width:68ch}
+.cal-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:13px}
+.cal th,.cal td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+.cal thead th{font:500 11px var(--mono);color:var(--muted);text-align:center}
+.cal thead th:first-child{text-align:left}
+.cal td.m{padding:6px 2px}
+.cal td.m span{display:block;height:16px;border-radius:3px;background:var(--bg)}
+.cal td.m span.on{background:var(--warn);opacity:.85}
+.cal td.m span.peak{background:var(--warn)}
+.cal tr.now-col td.m{}
+.cal td.where{color:var(--muted);font-size:12px}
+.cal th.cur{color:var(--ink);font-weight:600}
+.cal td.cur span{outline:2px solid var(--ink);outline-offset:-1px}
+
+.learn{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.learn article{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:8px;align-content:start}
+.learn article p{color:var(--muted);font-size:14px}
+.learn .big{font:500 26px/1 var(--mono);color:var(--accent)}
+
+.ask{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+.ask form{display:flex;gap:8px;flex-wrap:wrap}
+.ask input{flex:1 1 260px;min-width:0;font:15px var(--body);padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.btn{font:600 14px var(--body);padding:11px 16px;border-radius:8px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn[disabled]{opacity:.5;cursor:default}
+.suggest{display:flex;flex-wrap:wrap;gap:6px}
+.answer{white-space:pre-wrap;font-size:14.5px;max-width:75ch}
+.sources{font-size:13px;color:var(--muted);display:grid;gap:6px;border-top:1px solid var(--line);padding-top:16px}
+.sources ul{margin:0;padding-left:18px;display:grid;gap:4px}
+
+@media (max-width:900px){.atlas{grid-template-columns:1fr} header.top{grid-template-columns:1fr}}
+@media (max-width:480px){.temps{grid-template-columns:1fr 1fr 1fr}.temp b{font-size:18px}.bar{grid-template-columns:76px 1fr 56px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Atlas des lacs · Lac n°1</div>
+      <h1>Léman Vivant <span class="beta">BÊTA</span></h1>
+      <p class="lede">Explorez le lac zone par zone : qui y vit, quelles espèces sont menacées, la température de l'eau à plusieurs profondeurs, où se baigner et quels secteurs laisser tranquilles pendant la reproduction.</p>
+    </div>
+    <div class="eyebrow" id="stamp"></div>
+  </header>
+
+  <div class="facts" aria-label="Le Léman en chiffres">
+    <div class="fact"><b>580 km²</b><span>surface, plus grand lac d'Europe occidentale</span></div>
+    <div class="fact"><b>309 m</b><span>profondeur maximale</span></div>
+    <div class="fact"><b>89 km³</b><span>volume d'eau</span></div>
+    <div class="fact"><b>≈ 11 ans</b><span>pour renouveler toute l'eau</span></div>
+    <div class="fact"><b>372 m</b><span>altitude du plan d'eau</span></div>
+  </div>
+
+  <div class="atlas">
+    <div class="mapcard">
+      <div class="layers" role="group" aria-label="Couches de la carte">
+        <button class="chip" data-layer="temp" aria-pressed="true"><i></i>Température</button>
+        <button class="chip" data-layer="bio" aria-pressed="false"><i></i>Biodiversité</button>
+        <button class="chip" data-overlay="beaches" aria-pressed="true"><i></i>Plages</button>
+        <button class="chip" data-overlay="reserves" aria-pressed="true"><i></i>Zones sensibles</button>
+      </div>
+      <div class="mapbox" id="mapbox">
+        <svg class="map" id="map" role="img" aria-label="Carte du Léman découpée en zones"></svg>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <aside class="sheet" aria-live="polite">
+      <div class="sheet-head">
+        <div class="eyebrow" id="z-eyebrow"></div>
+        <h2 id="z-name"></h2>
+        <p id="z-desc"></p>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="eau" aria-selected="true">Eau</button>
+        <button class="tab" role="tab" data-tab="faune" aria-selected="false">Faune</button>
+        <button class="tab" role="tab" data-tab="menaces" aria-selected="false">Espèces menacées</button>
+        <button class="tab" role="tab" data-tab="pollution" aria-selected="false">Pollution</button>
+        <button class="tab" role="tab" data-tab="visiter" aria-selected="false">Visiter</button>
+      </div>
+      <div class="pane" id="pane"></div>
+    </aside>
+  </div>
+
+  <section class="block" id="calendrier">
+    <header>
+      <div class="eyebrow">Respecter la reproduction</div>
+      <h2>Quand laisser certaines zones tranquilles</h2>
+      <p>Périodes indicatives pour le Léman. Les dates exactes varient selon la météo et la température de l'eau. Les règles officielles (réserves, fermetures de pêche) priment toujours.</p>
+    </header>
+    <div class="cal-wrap"><table class="cal" id="cal"></table></div>
+  </section>
+
+  <section class="block">
+    <header>
+      <div class="eyebrow">Comprendre</div>
+      <h2>Ce qui se passe sous la surface</h2>
+    </header>
+    <div class="learn">
+      <article><span class="big" id="learn-thermo">—</span><h3>La thermocline</h3><p>En été et en automne, l'eau chaude flotte sur l'eau froide. Entre 10 et 30 m de profondeur, la température chute brutalement. Les chiffres en direct ci-dessus le montrent : comparez 1 m et 30 m.</p></article>
+      <article><span class="big">÷ 5</span><h3>Le phosphore a reculé</h3><p>Dans les années 1970, les rejets de phosphates (lessives, eaux usées) ont fait exploser les algues. Grâce aux stations d'épuration et à l'interdiction des phosphates dans les lessives, la concentration a été divisée par environ cinq depuis le pic de 1979.</p></article>
+      <article><span class="big">O₂</span><h3>Le fond manque d'oxygène</h3><p>Pour oxygéner les grands fonds, l'eau doit se mélanger de haut en bas en hiver. Avec des hivers plus doux, ce brassage complet devient rare : le dernier date de 2012.</p></article>
+      <article><span class="big">2015</span><h3>La moule quagga</h3><p>Arrivée vers 2015, cette petite moule invasive tapisse désormais les fonds par milliards. Elle filtre l'eau, bouche les conduites et modifie toute la chaîne alimentaire. Nettoyez et séchez votre bateau ou votre paddle avant de changer de lac.</p></article>
+      <article><span class="big">µg</span><h3>Micropolluants et plastiques</h3><p>Résidus de médicaments, pesticides, PFAS et microplastiques sont détectés dans le lac. Ils viennent des eaux usées, de l'agriculture, des routes et du Rhône. Les stations d'épuration s'équipent progressivement pour les traiter.</p></article>
+      <article><span class="big">Rhône</span><h3>Un lac nourri par les glaciers</h3><p>Le Rhône apporte la majeure partie de l'eau du lac. Froid et chargé de sédiments glaciaires, il plonge sous l'eau du lac en arrivant à Villeneuve et crée un canyon sous-lacustre.</p></article>
+    </div>
+  </section>
+
+  <section class="block" id="ask">
+    <header>
+      <div class="eyebrow">Poser une question</div>
+      <h2>Demandez au lac</h2>
+      <p>Une question sur la zone sélectionnée, une espèce ou le fonctionnement du lac ? La réponse s'appuie sur les données de cette page.</p>
+    </header>
+    <div class="ask">
+      <form id="askform">
+        <input id="askq" type="text" placeholder="Ex. : Pourquoi l'eau est-elle si froide à 30 m ?" aria-label="Votre question">
+        <button class="btn" id="askbtn" type="submit">Demander</button>
+      </form>
+      <div class="suggest" id="suggest"></div>
+      <div class="answer" id="answer"></div>
+    </div>
+  </section>
+
+  <footer class="sources">
+    <b style="color:var(--ink)">Sources et méthode (bêta)</b>
+    <ul>
+      <li>Température : modèle hydrodynamique Delft3D d'<a href="https://www.alplakes.eawag.ch" target="_blank" rel="noopener">Alplakes (Eawag)</a>, à 1, 10 et 30 m, 7 derniers jours. Valeurs modélisées, pas des mesures directes.</li>
+      <li>Faune : observations du <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> (iNaturalist, ornitho.ch, musées…) dans un rectangle autour de chaque zone, rives comprises. Le nombre d'observations reflète aussi le nombre d'observateurs, pas seulement l'abondance.</li>
+      <li>Statut de menace : Liste rouge mondiale de l'UICN via GBIF. Les listes rouges suisse et française peuvent différer.</li>
+      <li>Pollution et qualité de l'eau : synthèses de la <a href="https://www.cipel.org" target="_blank" rel="noopener">CIPEL</a>. Qualité de baignade : contrôles des cantons (GE, VD, VS) et, côté France, <a href="https://baignades.sante.gouv.fr" target="_blank" rel="noopener">baignades.sante.gouv.fr</a>.</li>
+      <li>Contour du lac : © contributeurs OpenStreetMap. Plages, réserves et périodes : positions et dates indicatives.</li>
+    </ul>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const DATA = {"fetched":"2026-10-21 13:37 UTC","zones":{"geneve":{"total":409219,"counts":{"oiseaux":122080,"insectes":135843,"amphibiens":9443,"mollusques":3732,"plantes":86497,"poissons":787},"fish":[{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":88},{"sci":"Perca fluviatilis","fr":"Perche","iucn":"LC","class":"Perciformes","n":58},{"sci":"Lepomis gibbosus","fr":"Achigan à petite bouche","iucn":"LC","class":"Perciformes","n":52},{"sci":"Phoxinus phoxinus","fr":"Amarante","iucn":"LC","class":"Cypriniformes","n":52},{"sci":"Squalius cephalus","fr":"Chevesne","iucn":"LC","class":"Cypriniformes","n":51},{"sci":"Gobio gobio","fr":"Gofi","iucn":"LC","class":"Cypriniformes","n":49},{"sci":"Ameiurus melas","fr":"Greffier Barbicho","iucn":"LC","class":"Siluriformes","n":46},{"sci":"Alburnoides bipunctatus","fr":"Ablette grise","iucn":"LC","class":"Cypriniformes","n":41}],"threatened":[{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":969},{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":830},{"sci":"Coenagrion mercuriale","fr":"Agrion de Mercure","iucn":"VU","class":"Insecta","n":738},{"sci":"Lampyris noctiluca","fr":"Lampyre","iucn":"NT","class":"Insecta","n":353},{"sci":"Branta ruficollis","fr":"Bernache à cou roux","iucn":"VU","class":"Aves","n":340},{"sci":"Aythya nyroca","fr":"Fuligule nyroca","iucn":"NT","class":"Aves","n":333},{"sci":"Calidris alpina","fr":"Bécasseau variable","iucn":"NT","class":"Aves","n":255},{"sci":"Arenaria interpres","fr":"Pluvier des Salines","iucn":"NT","class":"Aves","n":191},{"sci":"Somateria mollissima","fr":"Eider à duvet","iucn":"NT","class":"Aves","n":188},{"sci":"Vanellus vanellus","fr":"Vanneau huppé","iucn":"NT","class":"Aves","n":148},{"sci":"Triturus carnifex","fr":"Triton bourreau","iucn":"VU","class":"Amphibia","n":100},{"sci":"Podiceps auritus","fr":"Grèbe esclavon","iucn":"VU","class":"Aves","n":92},{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":89}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[17.0,16.96,16.98,16.91,16.49,16.48,16.34,16.19],"last":16.19},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[null,null,null,null,null,null,null,null],"last":null},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[null,null,null,null,null,null,null,null],"last":null}}},"cote":{"total":376337,"counts":{"oiseaux":52555,"insectes":141930,"amphibiens":3887,"mollusques":3184,"plantes":140679,"poissons":2650},"fish":[{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":1982},{"sci":"Cottus gobio","fr":"Chabot","iucn":"LC","class":"Scorpaeniformes","n":281},{"sci":"Squalius cephalus","fr":"Chevesne","iucn":"LC","class":"Cypriniformes","n":72},{"sci":"Perca fluviatilis","fr":"Perche","iucn":"LC","class":"Perciformes","n":45},{"sci":"Lota lota","fr":"Alote","iucn":"LC","class":"Gadiformes","n":41},{"sci":"Rutilus rutilus","fr":"Blanchet","iucn":"LC","class":"Cypriniformes","n":23},{"sci":"Esox lucius","fr":"Bec de canard","iucn":"LC","class":"Esociformes","n":22},{"sci":"Gobio gobio","fr":"Gofi","iucn":"LC","class":"Cypriniformes","n":22}],"threatened":[{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":918},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":575},{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":517},{"sci":"Lampyris noctiluca","fr":"Lampyre","iucn":"NT","class":"Insecta","n":240},{"sci":"Formica polyctena","fr":"Fourmi rousse","iucn":"NT","class":"Insecta","n":98},{"sci":"Formica rufa","fr":"Fourmi rousse des bois","iucn":"NT","class":"Insecta","n":50},{"sci":"Anser cygnoides","fr":"Oie cygnoïde","iucn":"EN","class":"Aves","n":37},{"sci":"Formica pratensis","fr":"Fourmi des clairières à dos noir","iucn":"NT","class":"Insecta","n":36},{"sci":"Triturus carnifex","fr":"Triton bourreau","iucn":"VU","class":"Amphibia","n":28},{"sci":"Aythya nyroca","fr":"Fuligule nyroca","iucn":"NT","class":"Aves","n":20},{"sci":"Somateria mollissima","fr":"Eider à duvet","iucn":"NT","class":"Aves","n":19},{"sci":"Plecotus austriacus","fr":"Oreillard gris","iucn":"NT","class":"Mammalia","n":18}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[17.07,16.99,17.11,17.2,16.6,16.5,15.69,15.95],"last":15.95},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[17.1,16.69,16.22,16.78,16.6,16.5,15.7,15.74],"last":15.74},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[7.47,7.14,7.1,7.29,7.51,7.58,7.31,7.0],"last":7.0}}},"lausanne":{"total":242012,"counts":{"oiseaux":37279,"insectes":47539,"amphibiens":6315,"mollusques":1684,"plantes":122378,"poissons":1203},"fish":[{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":479},{"sci":"Perca fluviatilis","fr":"Perche","iucn":"LC","class":"Perciformes","n":106},{"sci":"Tinca tinca","fr":"Aiguillons","iucn":"LC","class":"Cypriniformes","n":104},{"sci":"Phoxinus phoxinus","fr":"Amarante","iucn":"LC","class":"Cypriniformes","n":76},{"sci":"Squalius cephalus","fr":"Chevesne","iucn":"LC","class":"Cypriniformes","n":66},{"sci":"Alburnus alburnus","fr":"Ablette","iucn":"LC","class":"Cypriniformes","n":43},{"sci":"Abramis brama","fr":"Brème commune","iucn":"LC","class":"Cypriniformes","n":37},{"sci":"Salaria fluviatilis","fr":"Blennie fluviatile","iucn":"LC","class":"Perciformes","n":35}],"threatened":[{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":1711},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":1116},{"sci":"Lampyris noctiluca","fr":"Lampyre","iucn":"NT","class":"Insecta","n":356},{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":298},{"sci":"Calidris alpina","fr":"Bécasseau variable","iucn":"NT","class":"Aves","n":179},{"sci":"Haematopus ostralegus","fr":"Huîtrier pie","iucn":"NT","class":"Aves","n":50},{"sci":"Podiceps auritus","fr":"Grèbe esclavon","iucn":"VU","class":"Aves","n":48},{"sci":"Limosa lapponica","fr":"Barge rousse","iucn":"NT","class":"Aves","n":39},{"sci":"Arenaria interpres","fr":"Pluvier des Salines","iucn":"NT","class":"Aves","n":30},{"sci":"Pluvialis squatarola","fr":"Pluvier argenté","iucn":"VU","class":"Aves","n":26},{"sci":"Plecotus austriacus","fr":"Oreillard gris","iucn":"NT","class":"Mammalia","n":24}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.98,17.0,17.41,17.21,16.72,16.15,15.9,15.74],"last":15.74},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[15.6,14.76,15.42,15.64,16.0,16.1,15.51,14.95],"last":14.95},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[7.08,7.05,7.07,7.18,7.15,6.99,7.0,7.02],"last":7.02}}},"lavaux":{"total":89318,"counts":{"oiseaux":7536,"insectes":15511,"amphibiens":3245,"mollusques":1534,"plantes":53547,"poissons":471},"fish":[{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":280},{"sci":"Perca fluviatilis","fr":"Perche","iucn":"LC","class":"Perciformes","n":39},{"sci":"Rutilus rutilus","fr":"Blanchet","iucn":"LC","class":"Cypriniformes","n":23},{"sci":"Alburnus alburnus","fr":"Ablette","iucn":"LC","class":"Cypriniformes","n":22},{"sci":"Oncorhynchus mykiss","fr":"","iucn":"LC","class":"Salmoniformes","n":16},{"sci":"Squalius cephalus","fr":"Chevesne","iucn":"LC","class":"Cypriniformes","n":15},{"sci":"Tinca tinca","fr":"Aiguillons","iucn":"LC","class":"Cypriniformes","n":14},{"sci":"Salaria fluviatilis","fr":"Blennie fluviatile","iucn":"LC","class":"Perciformes","n":13}],"threatened":[{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":1324},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":239},{"sci":"Lampyris noctiluca","fr":"Lampyre","iucn":"NT","class":"Insecta","n":195},{"sci":"Formica rufa","fr":"Fourmi rousse des bois","iucn":"NT","class":"Insecta","n":81},{"sci":"Formica polyctena","fr":"Fourmi rousse","iucn":"NT","class":"Insecta","n":20},{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":18},{"sci":"Vipera aspis","fr":"Vipère aspic","iucn":"VU","class":"Squamata","n":12},{"sci":"Formica pratensis","fr":"Fourmi des clairières à dos noir","iucn":"NT","class":"Insecta","n":9},{"sci":"Triturus carnifex","fr":"Triton bourreau","iucn":"VU","class":"Amphibia","n":6},{"sci":"Emys orbicularis","fr":"Cistude","iucn":"NT","class":"Testudines","n":6}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.15,16.3,16.47,16.52,15.71,15.36,15.15,15.21],"last":15.21},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[15.98,15.96,16.03,16.05,14.91,13.48,13.32,14.63],"last":14.63},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[7.16,7.43,7.75,7.45,7.33,7.17,7.04,7.69],"last":7.69}}},"rhone":{"total":115808,"counts":{"oiseaux":28303,"insectes":26937,"amphibiens":1362,"mollusques":1154,"plantes":45068,"poissons":474},"fish":[{"sci":"Scardinius erythrophthalmus","fr":"About","iucn":"LC","class":"Cypriniformes","n":98},{"sci":"Tinca tinca","fr":"Aiguillons","iucn":"LC","class":"Cypriniformes","n":93},{"sci":"Ameiurus melas","fr":"Greffier Barbicho","iucn":"LC","class":"Siluriformes","n":59},{"sci":"Cyprinus carpio","fr":"Carpe commune, Carpat, Carpeau, Escarpo, Kerpaille","iucn":"LC","class":"Cypriniformes","n":49},{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":24},{"sci":"Abramis brama","fr":"Brème commune","iucn":"LC","class":"Cypriniformes","n":21},{"sci":"Cobitis bilineata","fr":"Loche de Canestrini","iucn":"LC","class":"Cypriniformes","n":18},{"sci":"Esox lucius","fr":"Bec de canard","iucn":"LC","class":"Esociformes","n":15}],"threatened":[{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":504},{"sci":"Somateria mollissima","fr":"Eider à duvet","iucn":"NT","class":"Aves","n":379},{"sci":"Melanitta fusca","fr":"Macreuse brune","iucn":"VU","class":"Aves","n":104},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":66},{"sci":"Calidris alpina","fr":"Bécasseau variable","iucn":"NT","class":"Aves","n":63},{"sci":"Oryctolagus cuniculus","fr":"Lapin commun","iucn":"EN","class":"Mammalia","n":43},{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":26},{"sci":"Astacus astacus","fr":"Écrevisse Fluviatile","iucn":"VU","class":"Malacostraca","n":24},{"sci":"Clangula hyemalis","fr":"Cacaoui","iucn":"VU","class":"Aves","n":19},{"sci":"Numenius arquata","fr":"Courlis cendré","iucn":"NT","class":"Aves","n":16},{"sci":"Podiceps auritus","fr":"Grèbe esclavon","iucn":"VU","class":"Aves","n":14},{"sci":"Gomphus pulchellus","fr":"Gomphe Joli","iucn":"NT","class":"Insecta","n":14},{"sci":"Vanellus vanellus","fr":"Vanneau huppé","iucn":"NT","class":"Aves","n":12}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.51,16.78,16.52,16.45,15.82,15.04,15.19,15.17],"last":15.17},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.07,15.96,16.39,15.88,15.88,15.09,15.22,15.26],"last":15.26},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[null,null,null,null,null,null,null,null],"last":null}}},"evian":{"total":122169,"counts":{"oiseaux":16768,"insectes":2577,"amphibiens":93,"mollusques":207,"plantes":95497,"poissons":848},"fish":[{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":520},{"sci":"Cottus gobio","fr":"Chabot","iucn":"LC","class":"Scorpaeniformes","n":200},{"sci":"Perca fluviatilis","fr":"Perche","iucn":"LC","class":"Perciformes","n":24},{"sci":"Phoxinus phoxinus","fr":"Amarante","iucn":"LC","class":"Cypriniformes","n":10},{"sci":"Barbatula barbatula","fr":"Loche franche","iucn":"LC","class":"Cypriniformes","n":10},{"sci":"Coregonus lavaretus","fr":"Corégone","iucn":"VU","class":"Salmoniformes","n":8},{"sci":"Alburnus alburnus","fr":"Ablette","iucn":"LC","class":"Cypriniformes","n":8},{"sci":"Lota lota","fr":"Alote","iucn":"LC","class":"Gadiformes","n":7}],"threatened":[{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":167},{"sci":"Somateria mollissima","fr":"Eider à duvet","iucn":"NT","class":"Aves","n":35},{"sci":"Melanitta fusca","fr":"Macreuse brune","iucn":"VU","class":"Aves","n":34},{"sci":"Aythya nyroca","fr":"Fuligule nyroca","iucn":"NT","class":"Aves","n":27},{"sci":"Clangula hyemalis","fr":"Cacaoui","iucn":"VU","class":"Aves","n":25},{"sci":"Vipera aspis","fr":"Vipère aspic","iucn":"VU","class":"Squamata","n":20},{"sci":"Podiceps auritus","fr":"Grèbe esclavon","iucn":"VU","class":"Aves","n":18},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":12},{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":11},{"sci":"Oryctolagus cuniculus","fr":"Lapin commun","iucn":"EN","class":"Mammalia","n":9},{"sci":"Calidris alpina","fr":"Bécasseau variable","iucn":"NT","class":"Aves","n":9},{"sci":"Coregonus lavaretus","fr":"Corégone","iucn":"VU","class":"Salmoniformes","n":8},{"sci":"Arenaria interpres","fr":"Pluvier des Salines","iucn":"NT","class":"Aves","n":8}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.82,17.34,17.02,17.11,16.48,16.19,15.74,15.61],"last":15.61},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.6,16.26,15.54,15.47,15.66,14.21,14.1,14.18],"last":14.18},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[7.11,7.36,7.28,7.13,7.23,7.31,7.5,7.5],"last":7.5}}},"chablais":{"total":161463,"counts":{"oiseaux":23957,"insectes":5474,"amphibiens":262,"mollusques":167,"plantes":125106,"poissons":1169},"fish":[{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":1100},{"sci":"Coregonus lavaretus","fr":"Corégone","iucn":"VU","class":"Salmoniformes","n":8},{"sci":"Cottus gobio","fr":"Chabot","iucn":"LC","class":"Scorpaeniformes","n":5},{"sci":"Tinca tinca","fr":"Aiguillons","iucn":"LC","class":"Cypriniformes","n":4},{"sci":"Squalius cephalus","fr":"Chevesne","iucn":"LC","class":"Cypriniformes","n":4},{"sci":"Salaria fluviatilis","fr":"Blennie fluviatile","iucn":"LC","class":"Perciformes","n":4},{"sci":"Esox lucius","fr":"Bec de canard","iucn":"LC","class":"Esociformes","n":3},{"sci":"Alburnoides bipunctatus","fr":"Ablette grise","iucn":"LC","class":"Cypriniformes","n":3}],"threatened":[{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":68},{"sci":"Arenaria interpres","fr":"Pluvier des Salines","iucn":"NT","class":"Aves","n":60},{"sci":"Melanitta fusca","fr":"Macreuse brune","iucn":"VU","class":"Aves","n":60},{"sci":"Somateria mollissima","fr":"Eider à duvet","iucn":"NT","class":"Aves","n":57},{"sci":"Streptopelia turtur","fr":"Tourterelle des bois","iucn":"VU","class":"Aves","n":40},{"sci":"Calidris alpina","fr":"Bécasseau variable","iucn":"NT","class":"Aves","n":39},{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":33},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":33},{"sci":"Vanellus vanellus","fr":"Vanneau huppé","iucn":"NT","class":"Aves","n":29},{"sci":"Lampyris noctiluca","fr":"Lampyre","iucn":"NT","class":"Insecta","n":25},{"sci":"Podiceps auritus","fr":"Grèbe esclavon","iucn":"VU","class":"Aves","n":21},{"sci":"Lycaena dispar","fr":"Argus satiné à taches noires","iucn":"NT","class":"Insecta","n":20},{"sci":"Numenius arquata","fr":"Courlis cendré","iucn":"NT","class":"Aves","n":17}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.79,16.85,16.93,16.84,16.39,16.09,15.85,15.54],"last":15.54},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.47,16.63,15.64,16.23,16.39,16.11,15.24,15.51],"last":15.51},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[null,null,null,null,null,null,null,null],"last":null}}},"large":{"total":10874,"counts":{"oiseaux":498,"insectes":1077,"amphibiens":90,"mollusques":267,"plantes":6909,"poissons":455},"fish":[{"sci":"Perca fluviatilis","fr":"Perche","iucn":"LC","class":"Perciformes","n":56},{"sci":"Squalius cephalus","fr":"Chevesne","iucn":"LC","class":"Cypriniformes","n":36},{"sci":"Cottus gobio","fr":"Chabot","iucn":"LC","class":"Scorpaeniformes","n":29},{"sci":"Salmo trutta","fr":"Truite commune","iucn":"LC","class":"Salmoniformes","n":29},{"sci":"Tinca tinca","fr":"Aiguillons","iucn":"LC","class":"Cypriniformes","n":26},{"sci":"Esox lucius","fr":"Bec de canard","iucn":"LC","class":"Esociformes","n":23},{"sci":"Salvelinus umbla","fr":"Omble chevalier","iucn":"LC","class":"Salmoniformes","n":20},{"sci":"Lota lota","fr":"Alote","iucn":"LC","class":"Gadiformes","n":18}],"threatened":[{"sci":"Salamandra salamandra","fr":"Salamandre tachetée","iucn":"VU","class":"Amphibia","n":50},{"sci":"Erinaceus europaeus","fr":"Hérisson commun","iucn":"NT","class":"Mammalia","n":22},{"sci":"Vipera aspis","fr":"Vipère aspic","iucn":"VU","class":"Squamata","n":11},{"sci":"Anguilla anguilla","fr":"Anguielo","iucn":"CR","class":"Anguilliformes","n":4},{"sci":"Coregonus lavaretus","fr":"Corégone","iucn":"VU","class":"Salmoniformes","n":3},{"sci":"Coregonus palaea","fr":"Palée","iucn":"EN","class":"Salmoniformes","n":2},{"sci":"Aythya ferina","fr":"Fuligule milouin","iucn":"VU","class":"Aves","n":2},{"sci":"Lampyris noctiluca","fr":"Lampyre","iucn":"NT","class":"Insecta","n":2},{"sci":"Alectoris graeca","fr":"Bartavelle grecque","iucn":"NT","class":"Aves","n":1},{"sci":"Calidris alpina","fr":"Bécasseau variable","iucn":"NT","class":"Aves","n":1},{"sci":"Podiceps auritus","fr":"Grèbe esclavon","iucn":"VU","class":"Aves","n":1},{"sci":"Melanitta fusca","fr":"Macreuse brune","iucn":"VU","class":"Aves","n":1}],"temp":{"1":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[16.63,16.77,16.85,16.91,16.38,15.89,15.99,15.86],"last":15.86},"10":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[15.54,14.97,14.57,14.44,13.6,13.64,12.95,14.81],"last":14.81},"30":{"time":["2026-10-14T00:00:00+00:00","2026-10-15T00:00:00+00:00","2026-10-16T00:00:00+00:00","2026-10-17T00:00:00+00:00","2026-10-18T00:00:00+00:00","2026-10-19T00:00:00+00:00","2026-10-20T00:00:00+00:00","2026-10-21T00:00:00+00:00"],"val":[7.17,7.18,7.14,7.11,7.01,7.01,7.07,7.06],"last":7.06}}}},"fetchedFr":"21 octobre 2026"};
+const LAKE = [[6.148,46.2069],[6.1498,46.2051],[6.1542,46.2043],[6.1612,46.2077],[6.1594,46.2081],[6.1626,46.2084],[6.1622,46.2092],[6.1615,46.209],[6.1591,46.2089],[6.159,46.2088],[6.159,46.209],[6.1624,46.2094],[6.1627,46.2089],[6.164,46.2088],[6.1671,46.2121],[6.1665,46.2096],[6.173,46.2123],[6.1687,46.2156],[6.1755,46.2153],[6.1826,46.2248],[6.1816,46.2244],[6.1905,46.233],[6.1933,46.2382],[6.194,46.2426],[6.1915,46.2446],[6.1917,46.2465],[6.194,46.2509],[6.1941,46.2575],[6.1983,46.264],[6.21,46.2656],[6.2183,46.2734],[6.2208,46.2785],[6.2282,46.2859],[6.2355,46.2891],[6.2426,46.2984],[6.2406,46.304],[6.2486,46.3063],[6.253,46.311],[6.2582,46.32],[6.2562,46.3241],[6.2619,46.3277],[6.2619,46.3292],[6.2722,46.3385],[6.2769,46.3454],[6.2768,46.35],[6.292,46.3597],[6.302,46.3641],[6.3012,46.3648],[6.301,46.3653],[6.302,46.3642],[6.303,46.3655],[6.3017,46.3656],[6.3018,46.3659],[6.3213,46.369],[6.3244,46.3708],[6.3236,46.3717],[6.3304,46.3697],[6.3431,46.3702],[6.3507,46.3672],[6.3504,46.362],[6.3597,46.3496],[6.3819,46.3406],[6.3814,46.342],[6.3898,46.3404],[6.3871,46.3411],[6.3917,46.3411],[6.3978,46.3491],[6.4043,46.3511],[6.4128,46.3599],[6.4303,46.3599],[6.4698,46.3739],[6.4767,46.3749],[6.4766,46.3753],[6.4757,46.3755],[6.4752,46.3761],[6.4773,46.3752],[6.4825,46.3823],[6.4838,46.3931],[6.4923,46.3983],[6.5133,46.405],[6.521,46.4041],[6.5209,46.4027],[6.5221,46.4037],[6.5383,46.3964],[6.5459,46.3947],[6.5877,46.4022],[6.5994,46.4017],[6.6005,46.4025],[6.6051,46.4029],[6.6057,46.4029],[6.6009,46.4026],[6.6008,46.4018],[6.6361,46.406],[6.6649,46.4046],[6.6796,46.4077],[6.724,46.408],[6.7356,46.405],[6.7569,46.4029],[6.7602,46.4005],[6.7901,46.393],[6.8051,46.3943],[6.8109,46.3907],[6.8292,46.3858],[6.8454,46.3886],[6.8533,46.3865],[6.8547,46.3877],[6.8558,46.3874],[6.8536,46.3864],[6.8558,46.3853],[6.8576,46.386],[6.8562,46.387],[6.8583,46.3866],[6.8597,46.3885],[6.8576,46.3934],[6.8599,46.3917],[6.8577,46.3943],[6.8573,46.3943],[6.8573,46.3937],[6.8569,46.3934],[6.8574,46.3944],[6.8601,46.3949],[6.8656,46.3928],[6.8827,46.3964],[6.8854,46.3958],[6.8873,46.3966],[6.8858,46.3997],[6.888,46.3961],[6.8862,46.3998],[6.8885,46.3955],[6.8911,46.395],[6.8958,46.3945],[6.9003,46.3967],[6.9051,46.3968],[6.9141,46.3955],[6.9151,46.3945],[6.9179,46.3942],[6.9193,46.3961],[6.9186,46.3972],[6.9198,46.396],[6.9249,46.3986],[6.925,46.4023],[6.9303,46.4066],[6.9308,46.4103],[6.9276,46.4147],[6.9273,46.4182],[6.9234,46.4209],[6.9226,46.4258],[6.9187,46.4293],[6.9123,46.4287],[6.9087,46.4307],[6.9094,46.4346],[6.9049,46.4385],[6.9005,46.4406],[6.8901,46.4389],[6.8848,46.4408],[6.8858,46.442],[6.8822,46.4411],[6.8734,46.4479],[6.8652,46.4484],[6.8599,46.447],[6.8567,46.4517],[6.8551,46.4523],[6.8554,46.4515],[6.8548,46.4511],[6.8517,46.4571],[6.8351,46.4607],[6.8348,46.464],[6.8313,46.4681],[6.8228,46.4677],[6.8199,46.4697],[6.8109,46.4703],[6.8145,46.4693],[6.8087,46.469],[6.8078,46.47],[6.8091,46.4706],[6.7887,46.4744],[6.7783,46.474],[6.7614,46.4799],[6.7441,46.4893],[6.7351,46.4892],[6.7303,46.4866],[6.7219,46.4862],[6.7008,46.498],[6.688,46.5015],[6.6791,46.5022],[6.6768,46.5043],[6.6683,46.5044],[6.669,46.5033],[6.6682,46.5045],[6.6648,46.5041],[6.6642,46.5059],[6.6624,46.5052],[6.664,46.5046],[6.6596,46.506],[6.6415,46.5047],[6.6324,46.5071],[6.6284,46.5067],[6.6291,46.5052],[6.6259,46.5045],[6.6236,46.5076],[6.621,46.507],[6.6205,46.5061],[6.615,46.5102],[6.6077,46.5126],[6.6049,46.5125],[6.6047,46.5112],[6.6058,46.511],[6.6087,46.5112],[6.6087,46.5111],[6.6058,46.5109],[6.6004,46.5121],[6.5991,46.5144],[6.5906,46.5184],[6.5871,46.5169],[6.579,46.5176],[6.5728,46.5132],[6.5655,46.5122],[6.5601,46.5078],[6.5561,46.5074],[6.5354,46.5073],[6.5353,46.5084],[6.5237,46.5145],[6.5165,46.5161],[6.5139,46.5155],[6.5131,46.5149],[6.5075,46.5158],[6.5015,46.5124],[6.502,46.5105],[6.4992,46.5064],[6.4989,46.5077],[6.4975,46.5065],[6.4991,46.5061],[6.4952,46.5041],[6.4943,46.5049],[6.4941,46.5035],[6.4889,46.501],[6.4898,46.5025],[6.4875,46.5024],[6.4884,46.5013],[6.4867,46.5015],[6.4829,46.4974],[6.482,46.492],[6.4694,46.4908],[6.4619,46.4851],[6.4619,46.4787],[6.4549,46.4788],[6.4485,46.4737],[6.4206,46.4684],[6.4094,46.463],[6.4084,46.4609],[6.4022,46.4589],[6.3915,46.4598],[6.3908,46.4617],[6.3902,46.4608],[6.3815,46.4652],[6.3731,46.4654],[6.3634,46.4623],[6.3516,46.4608],[6.3459,46.4613],[6.3384,46.4564],[6.3367,46.454],[6.3367,46.4535],[6.337,46.4532],[6.3372,46.4528],[6.3373,46.4524],[6.3372,46.4519],[6.3369,46.4514],[6.3361,46.4536],[6.3318,46.4492],[6.3192,46.4435],[6.3179,46.4395],[6.3069,46.4299],[6.2974,46.4261],[6.2955,46.4236],[6.2914,46.4233],[6.2902,46.4139],[6.2817,46.4057],[6.2831,46.4002],[6.2821,46.3971],[6.2781,46.3958],[6.2741,46.3901],[6.2583,46.3929],[6.2476,46.387],[6.2467,46.3826],[6.2444,46.3831],[6.2414,46.3788],[6.2413,46.3801],[6.2384,46.3779],[6.2395,46.3777],[6.2361,46.3769],[6.2333,46.3714],[6.2165,46.3588],[6.2157,46.356],[6.2088,46.3491],[6.2095,46.348],[6.2073,46.3476],[6.2074,46.3395],[6.2034,46.336],[6.2028,46.3299],[6.1976,46.3193],[6.1882,46.3124],[6.1786,46.3006],[6.1707,46.2959],[6.1698,46.2921],[6.172,46.2889],[6.1719,46.2879],[6.1702,46.2888],[6.1671,46.2816],[6.1714,46.2728],[6.1704,46.2735],[6.1663,46.2623],[6.1664,46.2639],[6.162,46.2628],[6.1581,46.2591],[6.1566,46.2549],[6.1517,46.2513],[6.1516,46.248],[6.154,46.2457],[6.1511,46.2393],[6.1512,46.2334],[6.149,46.2266],[6.1536,46.2214],[6.1516,46.2174],[6.1529,46.2129],[6.1544,46.2128],[6.1546,46.2119],[6.1529,46.2127],[6.1535,46.2108],[6.148,46.2069]];
+
+const NAMES = {"Gobio gobio":"Goujon","Phoxinus phoxinus":"Vairon","Tinca tinca":"Tanche","Scardinius erythrophthalmus":"Rotengle","Esox lucius":"Brochet","Rutilus rutilus":"Gardon","Lota lota":"Lotte","Lepomis gibbosus":"Perche-soleil","Ameiurus melas":"Poisson-chat","Cyprinus carpio":"Carpe commune","Anguilla anguilla":"Anguille européenne","Oncorhynchus mykiss":"Truite arc-en-ciel","Salmo trutta":"Truite (lacustre et de rivière)","Coregonus lavaretus":"Féra (corégone)","Coregonus palaea":"Palée (corégone)","Arenaria interpres":"Tournepierre à collier","Alectoris graeca":"Perdrix bartavelle","Alburnoides bipunctatus":"Spirlin","Clangula hyemalis":"Harelde boréale","Emys orbicularis":"Cistude d'Europe","Lycaena dispar":"Cuivré des marais","Astacus astacus":"Écrevisse à pattes rouges","Perca fluviatilis":"Perche","Salvelinus umbla":"Omble chevalier","Cottus gobio":"Chabot","Formica polyctena":"Fourmi des bois","Gomphus pulchellus":"Gomphe joli"};
+const EXCLUDE = new Set(["Anser cygnoides","Branta ruficollis","Oryctolagus cuniculus"]); // oiseaux échappés de captivité, lapin introduit
+const nm = s => NAMES[s.sci] || s.fr || s.sci;
+const IUCN = {CR:"En danger critique",EN:"En danger",VU:"Vulnérable",NT:"Quasi menacée",LC:"Préoccupation mineure"};
+
+const ZONES = {
+  geneve:{name:"Genève et la Rade",short:"Genève",seed:[6.20,46.262],side:"Suisse · GE",
+    desc:"Sortie du Rhône, rive la plus urbanisée et zone d'hivernage d'oiseaux d'eau d'importance internationale.",
+    pressures:["Ruissellement urbain et routes : métaux, hydrocarbures, microplastiques","Forte navigation de plaisance et ports","Déchets flottants qui s'accumulent dans la Rade","Espèces invasives : moule quagga, perche-soleil"],
+    places:[["Bains des Pâquis","Baignade urbaine, ouverte toute l'année, ambiance populaire"],["Genève-Plage","Grande plage aménagée avec piscine et pelouses"],["Jet d'eau et Rade","Observer fuligules, grèbes et harles en hiver"]]},
+  cote:{name:"La Côte, de Nyon à Rolle",short:"Nyon–Rolle",seed:[6.33,46.43],side:"Suisse · VD",
+    desc:"Rive vaudoise du Petit-Lac, bordée de vignes. Le Petit-Lac est peu profond (environ 76 m au maximum) et se réchauffe vite.",
+    pressures:["Ruissellement de produits phytosanitaires depuis les vignes","Embouchures de rivières (Promenthouse, Aubonne) : apports de sédiments et de polluants","Navigation et ports de plaisance"],
+    places:[["Plage de Nyon","Plage urbaine sous le château"],["Rolle et l'île de la Harpe","Baignade et promenade"],["Embouchure de l'Aubonne","Truites lacustres qui remontent en automne : observer sans déranger"]]},
+  lausanne:{name:"Lausanne et Morges",short:"Lausanne",seed:[6.58,46.497],side:"Suisse · VD",
+    desc:"Grande agglomération, baie de Vidy et embouchure de la Venoge. Une des zones les plus étudiées du lac.",
+    pressures:["Baie de Vidy : rejets historiques de la station d'épuration, micropolluants dans les sédiments","Ruissellement urbain et autoroutier","Forte fréquentation des rives en été"],
+    places:[["Bellerive-Plage","Plage et piscines au bord du lac"],["Plage de Vidy","Grande pelouse, accès facile"],["Embouchure de la Venoge","Roselière et oiseaux : rester sur les chemins au printemps"]]},
+  lavaux:{name:"Lavaux, Vevey et Montreux",short:"Lavaux–Montreux",seed:[6.80,46.462],side:"Suisse · VD",
+    desc:"Vignoble en terrasses inscrit à l'UNESCO. Les pentes plongent vite : l'eau devient profonde tout près du bord.",
+    pressures:["Ruissellement viticole sur des pentes très raides","Rives artificialisées : peu de roselières naturelles","Navigation des bateaux de la CGN et de plaisance"],
+    places:[["Vevey, plage de la Jetée","Baignade face aux Alpes"],["Clarens et Montreux","Promenade fleurie, bains"],["Sentier de Lavaux","Vue d'ensemble sur le Grand-Lac"]]},
+  rhone:{name:"Delta du Rhône et Grangettes",short:"Delta du Rhône",seed:[6.885,46.398],side:"Suisse · VD / VS",
+    desc:"Entrée du Rhône, principal affluent du lac. Eau froide, trouble, chargée de sédiments glaciaires. La réserve des Grangettes est un site Ramsar.",
+    pressures:["Apports du Rhône : sédiments, micropolluants industriels et agricoles du Valais, PFAS","Modification du régime des crues par les barrages","Dérangement des oiseaux par les embarcations près de la réserve"],
+    places:[["Réserve des Grangettes","Un des derniers grands marais du Léman, observatoires ornithologiques"],["Villeneuve","Plage et départ de promenades"],["Le Bouveret","Embouchure du Rhône côté valaisan"]]},
+  evian:{name:"Évian et Thonon",short:"Évian–Thonon",seed:[6.58,46.408],side:"France · Haute-Savoie",
+    desc:"Rive française du Grand-Lac. Le delta de la Dranse, à Thonon, est une réserve naturelle nationale.",
+    pressures:["Rivière Dranse : apports de sédiments et de nutriments","Pêche professionnelle (Thonon est un port de pêche important)","Fréquentation estivale des plages"],
+    places:[["Plage municipale de Thonon","Grande plage surveillée en été"],["Plage d'Évian et Amphion","Baignade le long des quais"],["Delta de la Dranse","Réserve naturelle : plus de 200 espèces d'oiseaux observées"]]},
+  chablais:{name:"Yvoire, Excenevex et Hermance",short:"Yvoire–Excenevex",seed:[6.36,46.335],side:"France · Haute-Savoie / GE",
+    desc:"Rive sud du Petit-Lac. Excenevex possède l'une des rares plages de sable naturel du lac.",
+    pressures:["Ruissellement agricole","Forte fréquentation touristique en été (Yvoire)","Ancrage des bateaux sur les herbiers"],
+    places:[["Plage d'Excenevex","Plage de sable, eau peu profonde"],["Yvoire","Village médiéval, jardin des Cinq Sens"],["Hermance","Plage et port côté genevois"]]},
+  large:{name:"Le Grand-Lac au large",short:"Grand-Lac",seed:[6.64,46.452],side:"Pleine eau",
+    desc:"La zone la plus profonde (309 m, entre Évian et Lausanne). Domaine des corégones et de l'omble chevalier, qui fraie sur les fonds.",
+    pressures:["Manque d'oxygène au fond quand l'hiver ne brasse pas toute la colonne d'eau","Réchauffement : la surface du lac s'est réchauffée d'environ 1 °C depuis les années 1970","Moule quagga sur les fonds jusqu'à grande profondeur"],
+    places:[["Traversée en bateau CGN","Lausanne–Évian en 35 minutes, la meilleure façon de voir le large"]]},
+};
+
+const BEACHES = [
+  ["Bains des Pâquis",6.153,46.211,"geneve"],["Genève-Plage",6.169,46.215,"geneve"],["Hermance",6.243,46.302,"chablais"],
+  ["Nyon",6.241,46.381,"cote"],["Rolle",6.340,46.458,"cote"],["Préverenges",6.528,46.510,"lausanne"],
+  ["Vidy",6.596,46.517,"lausanne"],["Bellerive",6.620,46.508,"lausanne"],["Pully",6.656,46.507,"lavaux"],
+  ["Vevey",6.840,46.461,"lavaux"],["Clarens",6.893,46.439,"lavaux"],["Villeneuve",6.922,46.398,"rhone"],
+  ["Saint-Gingolph",6.805,46.393,"rhone"],["Évian",6.588,46.402,"evian"],["Amphion",6.530,46.399,"evian"],
+  ["Thonon",6.496,46.383,"evian"],["Excenevex",6.355,46.349,"chablais"]];
+const RESERVES = [
+  {name:"Réserve des Grangettes",lon:6.902,lat:46.395,r:2.1,zone:"rhone",note:"Site Ramsar. Nidification avril–juillet, hivernage novembre–mars."},
+  {name:"Delta de la Dranse",lon:6.505,lat:46.394,r:1.3,zone:"evian",note:"Réserve naturelle nationale. Oiseaux migrateurs, truites en automne."},
+  {name:"Rade de Genève",lon:6.160,lat:46.214,r:1.4,zone:"geneve",note:"Réserve d'oiseaux d'eau d'importance internationale. Hivernage novembre–mars."},
+  {name:"Embouchure de la Venoge",lon:6.540,lat:46.512,r:1.0,zone:"lausanne",note:"Roselière, fraie et nidification au printemps."},
+  {name:"Embouchure de l'Aubonne",lon:6.395,lat:46.466,r:0.9,zone:"cote",note:"Remontée des truites lacustres d'octobre à décembre."},
+];
+const TOWNS = [["Genève",6.146,46.204],["Nyon",6.239,46.383],["Rolle",6.337,46.460],["Morges",6.498,46.511],["Lausanne",6.633,46.522],["Vevey",6.843,46.462],["Montreux",6.911,46.433],["Villeneuve",6.927,46.397],["Évian",6.590,46.398],["Thonon",6.479,46.371],["Yvoire",6.326,46.370]];
+
+const CAL = [
+  {what:"Oiseaux d'eau en hivernage",where:"Rade de Genève, Grangettes, Dranse, baies abritées",m:[2,2,1,0,0,0,0,0,0,0,1,2],tip:"Gardez vos distances en paddle ou en bateau : chaque envol coûte une énergie précieuse en hiver."},
+  {what:"Fraie du brochet",where:"Herbiers peu profonds, roselières",m:[0,1,2,1,0,0,0,0,0,0,0,0]},
+  {what:"Nidification en roselière",where:"Grangettes, Venoge, rives naturelles (grèbe huppé, rousserolles)",m:[0,0,0,2,2,2,1,0,0,0,0,0],tip:"N'accostez pas dans les roselières, ne vous approchez pas des nids flottants des grèbes."},
+  {what:"Fraie de la perche",where:"Branches immergées et herbiers, 2 à 10 m",m:[0,0,0,2,2,1,0,0,0,0,0,0],tip:"Les rubans d'œufs s'accrochent aux branches : ne les arrachez pas."},
+  {what:"Fraie des cyprinidés (gardon, carpe)",where:"Herbiers et bords peu profonds",m:[0,0,0,0,2,2,1,0,0,0,0,0]},
+  {what:"Remontée de la truite lacustre",where:"Embouchures : Rhône, Aubonne, Venoge, Dranse",m:[0,0,0,0,0,0,0,0,0,2,2,1]},
+  {what:"Fraie de l'omble chevalier",where:"Fonds caillouteux profonds (omblières)",m:[1,0,0,0,0,0,0,0,0,0,1,2]},
+  {what:"Fraie de la féra",where:"Pleine eau et talus, période de fermeture de la pêche",m:[1,0,0,0,0,0,0,0,0,0,0,2]},
+];
+const MONTHS = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+
+/* ---------- map ---------- */
+const kx = Math.cos(46.37*Math.PI/180), S = 10.5;
+const LON0 = 6.11, LAT0 = 46.555;
+const proj = ([lon,lat]) => [ (lon-LON0)*kx*111.32*S, (LAT0-lat)*111.32*S ];
+const W = Math.round((6.97-LON0)*kx*111.32*S), H = Math.round((LAT0-46.17)*111.32*S);
+const svg = d3.select("#map").attr("viewBox",`0 0 ${W} ${H}`);
+const lakePts = LAKE.map(proj);
+const lakePath = "M"+lakePts.map(p=>p.map(v=>v.toFixed(1)).join(",")).join("L")+"Z";
+
+const defs = svg.append("defs");
+defs.append("clipPath").attr("id","lakeclip").append("path").attr("d",lakePath);
+svg.append("text").attr("class","country").attr("x",W*0.52).attr("y",H*0.12).text("SUISSE");
+svg.append("text").attr("class","country").attr("x",W*0.45).attr("y",H*0.93).text("FRANCE");
+svg.append("path").attr("d",lakePath).attr("class","lake-shadow").attr("transform","translate(0,2)");
+
+const ids = Object.keys(ZONES);
+const seeds = ids.map(id=>proj(ZONES[id].seed));
+const vor = d3.Delaunay.from(seeds).voronoi([0,0,W,H]);
+const gz = svg.append("g").attr("clip-path","url(#lakeclip)");
+const zoneEls = {};
+ids.forEach((id,i)=>{
+  zoneEls[id] = gz.append("path").attr("d",vor.renderCell(i)).attr("class","zone").attr("tabindex",0)
+    .attr("role","button").attr("aria-label",ZONES[id].name)
+    .on("click",()=>select(id)).on("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(id)}})
+    .on("mousemove",e=>tip(e,`<b>${ZONES[id].name}</b><br>${layerTip(id)}`)).on("mouseleave",hideTip);
+});
+svg.append("path").attr("d",lakePath).attr("fill","none").attr("stroke","var(--water-deep)").attr("stroke-width",1.2);
+
+const gT = svg.append("g");
+TOWNS.forEach(([n,lon,lat])=>{const [x,y]=proj([lon,lat]);const north=lat>46.43||lon<6.25&&lat>46.3;
+  gT.append("circle").attr("class","town-dot").attr("cx",x).attr("cy",y).attr("r",2);
+  gT.append("text").attr("class","town").attr("x",x).attr("y",north?y-6:y+13).attr("text-anchor","middle").text(n);});
+
+const gR = svg.append("g").attr("id","reserves");
+RESERVES.forEach(r=>{const [x,y]=proj([r.lon,r.lat]);
+  gR.append("circle").attr("class","reserve").attr("cx",x).attr("cy",y).attr("r",r.r*S)
+   .on("click",()=>{select(r.zone,"visiter")}).on("mousemove",e=>tip(e,`<b>${r.name}</b><br>${r.note}`)).on("mouseleave",hideTip);});
+const gB = svg.append("g").attr("id","beaches");
+BEACHES.forEach(([n,lon,lat,z])=>{const [x,y]=proj([lon,lat]);
+  gB.append("circle").attr("class","beach").attr("cx",x).attr("cy",y).attr("r",4.2)
+   .on("click",()=>select(z,"visiter")).on("mousemove",e=>tip(e,`<b>Plage · ${n}</b><br>${tempTxt(z)} en surface`)).on("mouseleave",hideTip);});
+
+const gL = svg.append("g");
+ids.forEach((id,i)=>{const c = d3.polygonCentroid(clipCentroidPoly(i)); const [x,y]=c||seeds[i]; const dy = id==="lausanne"?10:id==="evian"?-6:0;
+  gL.append("text").attr("class","zlabel").attr("x",x).attr("y",y+dy).attr("text-anchor","middle").text(ZONES[id].short);});
+function clipCentroidPoly(i){ // centroid of lake points inside the cell, for label placement
+  const inside = lakePts.filter(p=>vor.contains(i,p[0],p[1]));
+  const s = seeds[i];
+  if(inside.length<3) return [s,s,s];
+  const cx=d3.mean(inside,p=>p[0]), cy=d3.mean(inside,p=>p[1]);
+  const x=(cx+s[0]*2)/3, y=(cy+s[1]*2)/3; return [[x,y],[x+.01,y],[x,y+.01]];
+}
+
+/* ---------- tooltips ---------- */
+const tipEl = document.getElementById("tip"), box = document.getElementById("mapbox");
+function tip(e,html){const r=box.getBoundingClientRect();tipEl.innerHTML=html;tipEl.hidden=false;
+  tipEl.style.left=Math.min(Math.max(e.clientX-r.left,110),r.width-110)+"px";tipEl.style.top=(e.clientY-r.top)+"px";}
+function hideTip(){tipEl.hidden=true}
+
+/* ---------- layers ---------- */
+let layer = "temp";
+const surf = id => DATA.zones[id].temp["1"]?.last;
+const fmtT = v => v==null ? "—" : v.toFixed(1).replace(".",",")+" °C";
+const tempTxt = id => fmtT(surf(id));
+const temps = ids.map(surf).filter(v=>v!=null);
+const tScale = d3.scaleSequential(d3.interpolateRgbBasis(["#2c6fa8","#5fb3c4","#e9d38a","#e08a3c"])).domain([Math.floor(d3.min(temps)*2)/2-0.5, Math.ceil(d3.max(temps)*2)/2+0.5]);
+const totals = ids.map(id=>DATA.zones[id].total);
+const bScale = d3.scaleSequentialLog(d3.interpolateRgbBasis(["#d8ece6","#7cc0a5","#2e8a6a","#145c45"])).domain([d3.min(totals),d3.max(totals)]);
+const fmtN = n => n.toLocaleString("fr-CH");
+function layerTip(id){return layer==="temp" ? `${tempTxt(id)} à 1 m de profondeur` : `${fmtN(DATA.zones[id].total)} observations naturalistes`}
+function paint(){
+  ids.forEach(id=>zoneEls[id].attr("fill", layer==="temp" ? tScale(surf(id)) : bScale(DATA.zones[id].total)));
+  const lg = document.getElementById("legend");
+  const dom = layer==="temp"?tScale.domain():bScale.domain();
+  const sc = layer==="temp"?tScale:bScale;
+  const stops = d3.range(0,1.01,.1).map(t=>sc(layer==="temp"?dom[0]+t*(dom[1]-dom[0]):Math.exp(Math.log(dom[0])+t*(Math.log(dom[1])-Math.log(dom[0]))))).join(",");
+  lg.innerHTML = (layer==="temp"
+    ? `<span>Surface (1 m)</span><span class="mono">${fmtT(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="mono">${fmtT(dom[1])}</span>`
+    : `<span>Observations</span><span class="mono">${fmtN(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="mono">${fmtN(dom[1])}</span>`)
+    + `<span style="display:inline-flex;gap:6px;align-items:center"><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--sun)"/></svg>Plage</span>`
+    + `<span style="display:inline-flex;gap:6px;align-items:center"><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--warn)" fill-opacity=".2" stroke="var(--warn)" stroke-dasharray="3 2"/></svg>Zone sensible</span>`;
+}
+document.querySelectorAll("[data-layer]").forEach(b=>b.addEventListener("click",()=>{
+  layer=b.dataset.layer; document.querySelectorAll("[data-layer]").forEach(x=>x.setAttribute("aria-pressed",x===b)); paint();}));
+document.querySelectorAll("[data-overlay]").forEach(b=>b.addEventListener("click",()=>{
+  const on = b.getAttribute("aria-pressed")!=="true"; b.setAttribute("aria-pressed",on);
+  document.getElementById(b.dataset.overlay).style.display = on?"":"none";}));
+
+/* ---------- zone sheet ---------- */
+let cur = "lausanne", curTab = "eau";
+function select(id,tab){cur=id; if(tab) curTab=tab;
+  ids.forEach(z=>zoneEls[z].classed("sel",z===id));
+  const Z = ZONES[id];
+  document.getElementById("z-eyebrow").textContent = Z.side;
+  document.getElementById("z-name").textContent = Z.name;
+  document.getElementById("z-desc").textContent = Z.desc;
+  renderTab(); renderSuggest();
+  try{localStorage.setItem("leman-zone",id)}catch(e){}
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{curTab=t.dataset.tab;renderTab()}));
+
+function spark(series){
+  const w=320,h=90,m={l:30,r:8,t:8,b:18};
+  const pts = series.time.map((t,i)=>[new Date(t),series.val[i]]).filter(p=>p[1]!=null);
+  if(pts.length<2) return "";
+  const x=d3.scaleTime().domain(d3.extent(pts,p=>p[0])).range([m.l,w-m.r]);
+  const lo=d3.min(pts,p=>p[1]), hi=d3.max(pts,p=>p[1]);
+  const y=d3.scaleLinear().domain([Math.floor(lo-.3),Math.ceil(hi+.3)]).range([h-m.b,m.t]);
+  const line=d3.line().x(p=>x(p[0])).y(p=>y(p[1]));
+  const area=d3.area().x(p=>x(p[0])).y0(h-m.b).y1(p=>y(p[1]));
+  const yt=y.ticks(3), last=pts[pts.length-1];
+  const fmtD=d3.timeFormat("%d.%m");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" role="img" aria-label="Température à 1 m sur 7 jours">
+    ${yt.map(v=>`<line x1="${m.l}" x2="${w-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-5}" y="${y(v)+3}" text-anchor="end">${v}°</text>`).join("")}
+    <path d="${area(pts)}" fill="var(--accent)" fill-opacity=".12"/>
+    <path d="${line(pts)}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    <circle cx="${x(last[0])}" cy="${y(last[1])}" r="3.5" fill="var(--accent)"/>
+    <text x="${m.l}" y="${h-4}">${fmtD(pts[0][0])}</text><text x="${w-m.r}" y="${h-4}" text-anchor="end">${fmtD(last[0])}</text>
+  </svg>`;
+}
+function spList(arr,empty){
+  if(!arr.length) return `<p class="note">${empty}</p>`;
+  return `<ul class="list">${arr.map(s=>`<li><span class="iucn ${s.iucn||"LC"}" title="${IUCN[s.iucn]||"Non évaluée"}">${s.iucn||"–"}</span><div><div class="sp-name">${nm(s)}</div><div class="sp-sci">${s.sci}</div></div><span class="n">${fmtN(s.n)} obs.</span></li>`).join("")}</ul>`;
+}
+function renderTab(){
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.tab===curTab));
+  const z = DATA.zones[cur], Z = ZONES[cur], el = document.getElementById("pane");
+  if(curTab==="eau"){
+    const t = d => z.temp[d]?.last;
+    const diff = (t("1")!=null && t("30")!=null) ? (t("1")-t("30")).toFixed(1).replace(".",",") : null;
+    el.innerHTML = `<div class="temps">
+      <div class="temp"><span>Surface · 1 m</span><b>${fmtT(t("1"))}</b></div>
+      <div class="temp"><span>10 m</span><b>${fmtT(t("10"))}</b></div>
+      <div class="temp"><span>30 m</span><b>${fmtT(t("30"))}</b></div></div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Surface, 7 derniers jours</div>${spark(z.temp["1"])}</div>
+      <p class="note">${diff?`Il fait ${diff} °C de moins à 30 m qu'en surface : c'est la thermocline, une frontière invisible entre l'eau chaude et l'eau froide du fond.`:`Cette zone est trop peu profonde à cet endroit pour une valeur à 30 m.`} Valeurs du modèle Alplakes (Eawag), relevées le ${DATA.fetchedFr}.</p>`;
+  } else if(curTab==="faune"){
+    const c = z.counts, max = d3.max(Object.values(c));
+    const lab = {oiseaux:"Oiseaux",insectes:"Insectes",plantes:"Plantes",amphibiens:"Amphibiens",mollusques:"Mollusques",poissons:"Poissons"};
+    el.innerHTML = `<div class="bars">${Object.keys(lab).map(k=>`<div class="bar"><span>${lab[k]}</span><span class="track"><span class="fill" style="display:block;width:${Math.max(1,c[k]/max*100)}%"></span></span><span class="n">${fmtN(c[k])}</span></div>`).join("")}</div>
+      <div><div class="eyebrow" style="margin-bottom:4px">Poissons les plus observés</div>${spList(z.fish,"Pas encore de données.")}</div>
+      <p class="note">Observations GBIF autour de la zone, rives comprises. Plus il y a d'observateurs, plus il y a de données : ce n'est pas une mesure exacte de l'abondance.</p>`;
+  } else if(curTab==="menaces"){
+    const th = z.threatened.filter(s=>!EXCLUDE.has(s.sci));
+    el.innerHTML = `<p>Espèces observées ici et classées sur la Liste rouge mondiale de l'UICN.</p>${spList(th,"Aucune espèce menacée dans les données.")}
+      <p class="note">CR : en danger critique · EN : en danger · VU : vulnérable · NT : quasi menacée. Le statut est mondial : une espèce peut être plus ou moins menacée en Suisse ou en France.</p>`;
+  } else if(curTab==="pollution"){
+    el.innerHTML = `<div class="eyebrow">Principales pressions dans cette zone</div><ul class="pressure">${Z.pressures.map(p=>`<li><span>${p}</span></li>`).join("")}</ul>
+      <p class="note">Synthèse qualitative pour la bêta. Prochaine étape : brancher les mesures de la CIPEL (phosphore, oxygène, micropolluants) et les résultats officiels de qualité de baignade.</p>`;
+  } else {
+    const rs = RESERVES.filter(r=>r.zone===cur), bs = BEACHES.filter(b=>b[3]===cur);
+    el.innerHTML = `${Z.places.map(([n,d])=>`<div class="place"><b>${n}</b><span style="color:var(--muted);font-size:14px">${d}</span></div>`).join("")}
+      ${bs.length?`<div><div class="eyebrow" style="margin-bottom:6px">Plages de la zone</div><p>${bs.map(b=>b[0]).join(" · ")} <span class="tag">· eau ${tempTxt(cur)}</span></p></div>`:""}
+      ${rs.length?`<div><div class="eyebrow" style="margin-bottom:6px;color:var(--warn)">Zones à respecter</div>${rs.map(r=>`<div class="place"><b>${r.name}</b><span style="color:var(--muted);font-size:14px">${r.note}</span></div>`).join("")}</div>`:""}
+      <p class="note">Avant de vous baigner, vérifiez la qualité de l'eau publiée par le canton ou la commune.</p>`;
+  }
+}
+
+/* ---------- calendar ---------- */
+const nowM = new Date().getMonth();
+document.getElementById("cal").innerHTML = `<thead><tr><th>Période sensible</th>${MONTHS.map((m,i)=>`<th class="${i===nowM?"cur":""}">${m}</th>`).join("")}<th>Où</th></tr></thead>
+<tbody>${CAL.map(r=>`<tr title="${r.tip||""}"><td><b style="font-weight:600">${r.what}</b>${r.tip?`<div style="font-size:12px;color:var(--muted)">${r.tip}</div>`:""}</td>${r.m.map((v,i)=>`<td class="m ${i===nowM?"cur":""}"><span class="${v===2?"peak":v===1?"on":""}"></span></td>`).join("")}<td class="where">${r.where}</td></tr>`).join("")}</tbody>`;
+
+/* ---------- learn ---------- */
+const th = ids.map(id=>[DATA.zones[id].temp["1"]?.last, DATA.zones[id].temp["30"]?.last]).filter(([a,b])=>a!=null&&b!=null);
+if(th.length){document.getElementById("learn-thermo").textContent = "− "+d3.mean(th,([a,b])=>a-b).toFixed(1).replace(".",",")+" °C";}
+document.getElementById("stamp").textContent = "Données du "+DATA.fetchedFr;
+
+/* ---------- ask Claude ---------- */
+const askform=document.getElementById("askform"), askq=document.getElementById("askq"), askbtn=document.getElementById("askbtn"), answer=document.getElementById("answer");
+let sampleFn = null, ctrl = null;
+function renderSuggest(){
+  const Z=ZONES[cur];
+  const qs=[`Que voir à ${Z.short} en ce moment ?`,`Pourquoi le fond du lac manque-t-il d'oxygène ?`,`Comment protéger les frayères de perches ?`];
+  document.getElementById("suggest").innerHTML = qs.map(q=>`<button type="button" class="chip">${q}</button>`).join("");
+  document.querySelectorAll("#suggest .chip").forEach(b=>b.onclick=()=>{askq.value=b.textContent;askform.requestSubmit()});
+}
+function context(){
+  const z=DATA.zones[cur], Z=ZONES[cur];
+  return `Zone sélectionnée : ${Z.name} (${Z.side}). ${Z.desc}
+Température modélisée (Alplakes) le ${DATA.fetchedFr} : 1 m ${fmtT(z.temp["1"]?.last)}, 10 m ${fmtT(z.temp["10"]?.last)}, 30 m ${fmtT(z.temp["30"]?.last)}.
+Poissons observés (GBIF) : ${z.fish.map(nm).join(", ")}.
+Espèces menacées observées (UICN mondial) : ${z.threatened.filter(s=>!EXCLUDE.has(s.sci)).map(s=>nm(s)+" ("+s.iucn+")").join(", ")}.
+Pressions : ${Z.pressures.join(" ; ")}.
+Mois actuel : ${new Date().toLocaleDateString("fr-CH",{month:"long",year:"numeric"})}.`;
+}
+askform.addEventListener("submit",async e=>{
+  e.preventDefault(); const q=askq.value.trim(); if(!q) return;
+  if(!sampleFn){answer.textContent="La question à Claude n'est pas disponible dans cette vue.";return;}
+  ctrl?.abort(); ctrl=new AbortController(); askbtn.disabled=true; answer.textContent="Réflexion…";
+  const prompt=`Tu es le guide naturaliste de l'application « Léman Vivant ». Réponds en français, simplement, en 120 à 200 mots, sans titres ni listes longues. Appuie-toi sur le contexte ; si tu n'es pas sûr d'un fait précis (date, chiffre, règlement), dis-le et renvoie vers la source officielle (CIPEL, cantons, Eawag). Ne donne jamais d'autorisation de baignade : renvoie vers les contrôles officiels.
+
+Contexte :
+${context()}
+
+Question : ${q}`;
+  try{ const r = await sampleFn(prompt,{signal:ctrl.signal,modelTier:"quick",onText:({text})=>{answer.textContent=text}}); answer.textContent=r.text; }
+  catch(err){ answer.textContent = err?.code==="not_granted" ? "L'accès à Claude a été refusé pour cette page." : err?.code==="rate_limited" ? "Trop de questions d'un coup. Réessayez dans un instant." : "La réponse n'a pas pu être obtenue."; }
+  finally{ askbtn.disabled=false; }
+});
+if(!window.claude?.use) document.getElementById("ask").hidden = true; // hors de claude.ai (app web) : pas de question à Claude
+(async()=>{ try{ sampleFn = window.claude?.use ? await window.claude.use("sample") : null; }catch(e){ sampleFn=null; }
+  if(!sampleFn){ askbtn.disabled=true; askq.disabled=true; answer.textContent="La question à Claude est disponible quand la page est ouverte sur claude.ai."; } })();
+
+/* ---------- boot ---------- */
+let start="lausanne"; try{const s=localStorage.getItem("leman-zone"); if(s&&ZONES[s]) start=s;}catch(e){}
+paint(); select(start);
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
