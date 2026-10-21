@@ -6,7 +6,7 @@ Usage : python3 outils/actualiser.py            (récupère les données et reco
 - Si une source ne répond pas, garde les données précédentes de cette zone.
 - Écrit outils/data/zones.json puis reconstruit leman-vivant.html à côté du dossier outils.
 """
-import datetime, json, os, re, sys, time, urllib.error, urllib.request
+import datetime, json, math, os, re, sys, time, urllib.error, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "zones.json")
@@ -194,6 +194,63 @@ def niveau():
     }
 
 
+# Qualité des eaux de baignade : classement officiel publié chaque année par l'Agence européenne
+# de l'environnement (données des cantons suisses et des agences régionales de santé françaises)
+EEA = "https://marine.discomap.eea.europa.eu/arcgis/rest/services/BathingWater/BathingWater_Dyna_WM_{}/MapServer/3/query"
+QUALITE = {"Excellent": "excellente", "Good": "bonne", "Sufficient": "suffisante", "Poor": "insuffisante",
+           "Not classified": "non classée"}
+PETITS_MOTS = {"de", "du", "des", "la", "le", "les", "sur", "à", "aux", "et", "en"}
+
+
+def joli_nom(s):
+    """« PLAGE DE LA POINTE-À-LA-BISE » → « Plage de la Pointe-à-la-Bise »."""
+    def mot(m, premier):
+        if "'" in m:  # d'hermance → d'Hermance
+            a, b = m.split("'", 1)
+            return a + "'" + mot(b, False).capitalize() if a in ("d", "l") else m.capitalize()
+        if "-" in m:
+            return "-".join(mot(p, premier and i == 0) for i, p in enumerate(m.split("-")))
+        return m if (m in PETITS_MOTS and not premier) else m.capitalize()
+    return " ".join(mot(m, i == 0) for i, m in enumerate(s.lower().split()))
+
+
+def pres_du_lac(lon, lat, km=1.0):
+    """Vrai si le point est à moins de `km` du contour du Léman."""
+    kx = math.cos(math.radians(46.37)) * 111.32
+    lake = json.load(open(LAKE))
+    px, py = lon * kx, lat * 111.32
+    best = 1e9
+    for (x1, y1), (x2, y2) in zip(lake, lake[1:] + lake[:1]):
+        ax, ay, bx, by = x1 * kx, y1 * 111.32, x2 * kx, y2 * 111.32
+        dx, dy = bx - ax, by - ay
+        t = max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy or 1)))
+        best = min(best, math.hypot(px - ax - t * dx, py - ay - t * dy))
+    return best <= km
+
+
+def baignade(now):
+    params = ("where=1%3D1&geometry=6.10,46.18,6.98,46.56&geometryType=esriGeometryEnvelope&inSR=4326"
+              "&spatialRel=esriSpatialRelIntersects&returnGeometry=false&f=json&outFields=bathingWaterName,"
+              "countryCode,bwWaterCategory,longitude,latitude,qualityStatus,bathingWaterIdentifier,bwProfileLink")
+    for saison in range(now.year, now.year - 4, -1):  # le classement d'une saison paraît l'année suivante
+        try:
+            feats = get(EEA.format(saison) + "?" + params).get("features", [])
+        except Exception:
+            continue
+        sites = []
+        for f in feats:
+            a = f["attributes"]
+            if a["bwWaterCategory"] != "Lake" or not pres_du_lac(a["longitude"], a["latitude"]):
+                continue
+            sites.append({"nom": joli_nom(a["bathingWaterName"]), "pays": a["countryCode"],
+                          "lon": round(a["longitude"], 5), "lat": round(a["latitude"], 5),
+                          "qualite": QUALITE.get(a["qualityStatus"], "non classée"),
+                          "lien": (a["bwProfileLink"] or "").replace("http://", "https://")})
+        if sites:
+            return {"saison": saison, "sites": sorted(sites, key=lambda s: s["nom"])}
+    raise RuntimeError("aucun classement de baignade trouvé")
+
+
 def main():
     old = json.load(open(DATA)) if os.path.exists(DATA) else {"zones": {}}
     now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
@@ -222,6 +279,13 @@ def main():
         problems.append(f"niveau du lac : {e}")
         if old.get("niveau"):
             res["niveau"] = old["niveau"]
+    try:
+        res["baignade"] = baignade(now)
+        print(f"baignade ok : {len(res['baignade']['sites'])} sites, saison {res['baignade']['saison']}", flush=True)
+    except Exception as e:
+        problems.append(f"baignade : {e}")
+        if old.get("baignade"):
+            res["baignade"] = old["baignade"]
     if any(res["zones"][z].get("total") is None for z, *_ in ZONES):
         sys.exit("Données incomplètes et pas de version précédente : page non reconstruite.")
     y, m, d = res["fetched"][:10].split("-")

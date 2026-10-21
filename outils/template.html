@@ -68,6 +68,28 @@ a{color:var(--accent);text-underline-offset:2px}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:transparent;color:var(--ink)}
 .chip[aria-pressed="true"] i{background:var(--accent)}
 .chip[data-overlay="beaches"][aria-pressed="true"] i{background:var(--sand)}
+.chip.locate{margin-left:auto;color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.chip.locate svg{display:block}
+.chip.locate[aria-busy="true"]{opacity:.6}
+.whereami{margin:0 14px 12px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);display:grid;gap:6px;font-size:14.5px}
+.whereami b{font:400 18px/1.2 var(--display)}
+.whereami .alert{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:8px 10px}
+.whereami .alert strong{color:var(--warn)}
+.whereami .alert.calm{background:var(--surface)}
+.whereami button{justify-self:start;font:500 13px var(--body);background:none;border:0;color:var(--muted);cursor:pointer;padding:0;text-decoration:underline}
+.me{fill:var(--accent);stroke:var(--surface);stroke-width:2.5}
+.me-halo{fill:var(--accent);opacity:.18}
+@media (prefers-reduced-motion:no-preference){.me-halo{animation:halo 2s ease-out infinite;transform-box:fill-box;transform-origin:center}}
+@keyframes halo{from{transform:scale(.6);opacity:.35}to{transform:scale(1.6);opacity:0}}
+.site{stroke:var(--surface);stroke-width:1.4;cursor:pointer}
+.q-excellente{--q:var(--accent)} .q-bonne{--q:var(--reed)} .q-suffisante{--q:var(--sand)} .q-insuffisante{--q:var(--warn)} .q-non{--q:var(--muted)}
+.site{fill:var(--q)}
+.qbadge{font:600 11px/1 var(--body);padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--q) 18%,transparent);color:var(--q);white-space:nowrap}
+.bathing{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.bathing li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dotted var(--line);font-size:14.5px}
+.bathing li:last-child{border-bottom:0}
+.bathing a{color:var(--ink);text-decoration:none}
+.bathing a:hover{text-decoration:underline}
 .chip[data-overlay="reserves"][aria-pressed="true"] i{background:var(--reed)}
 .chip:hover{color:var(--ink)}
 .chip:focus-visible,button:focus-visible,.zone:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -268,9 +290,11 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
         <div class="layers" role="group" aria-label="Couches de la carte">
           <button class="chip" data-layer="temp" aria-pressed="true"><i></i>Température</button>
           <button class="chip" data-layer="bio" aria-pressed="false"><i></i>Biodiversité</button>
-          <button class="chip" data-overlay="beaches" aria-pressed="true"><i></i>Plages</button>
+          <button class="chip" data-overlay="beaches" aria-pressed="true"><i></i>Baignade</button>
           <button class="chip" data-overlay="reserves" aria-pressed="true"><i></i>Zones sensibles</button>
+          <button class="chip locate" id="locate" type="button" hidden><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>Où suis-je ?</button>
         </div>
+        <div class="whereami" id="whereami" hidden aria-live="polite"></div>
         <div class="mapbox" id="mapbox">
           <svg class="map" id="map" role="img" aria-label="Carte du Léman découpée en zones"></svg>
           <div class="tip" id="tip" hidden></div>
@@ -289,7 +313,7 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
           <button class="tab" role="tab" data-tab="faune" aria-selected="false">Faune</button>
           <button class="tab" role="tab" data-tab="menaces" aria-selected="false">Espèces menacées</button>
           <button class="tab" role="tab" data-tab="pollution" aria-selected="false">Pollution</button>
-          <button class="tab" role="tab" data-tab="visiter" aria-selected="false">Visiter</button>
+          <button class="tab" role="tab" data-tab="visiter" aria-selected="false">Baignade et visite</button>
         </div>
         <div class="pane" id="pane"></div>
       </aside>
@@ -373,6 +397,7 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
           <li>Niveau du lac : station « Lac Léman - St-Prex » de l'<a href="https://www.hydrodaten.admin.ch/fr/seen-und-fluesse/stationen-und-daten/2027" target="_blank" rel="noopener">OFEV (hydrodaten.admin.ch)</a>. La normale est la moyenne 1943–2025 pour la date du jour, interpolée entre les moyennes mensuelles.</li>
           <li>Faune : observations du <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> (iNaturalist, ornitho.ch, musées…) dans un rectangle autour de chaque zone, rives comprises. Le nombre d'observations reflète aussi le nombre d'observateurs, pas seulement l'abondance.</li>
           <li>Statut de menace : Liste rouge mondiale de l'UICN via GBIF. Les listes rouges suisse et française peuvent différer.</li>
+          <li>Qualité des eaux de baignade : classement officiel annuel publié par l'<a href="https://www.eea.europa.eu/en/topics/in-depth/bathing-water" target="_blank" rel="noopener">Agence européenne de l'environnement</a>, à partir des analyses du canton de Genève et des agences régionales de santé françaises. Vaud et le Valais ne publient pas encore ce classement en données ouvertes.</li>
           <li>Pollution et qualité de l'eau : synthèses de la <a href="https://www.cipel.org" target="_blank" rel="noopener">CIPEL</a>. Qualité de baignade : contrôles des cantons (GE, VD, VS) et, côté France, <a href="https://baignades.sante.gouv.fr" target="_blank" rel="noopener">baignades.sante.gouv.fr</a>.</li>
           <li>Contour du lac : © contributeurs OpenStreetMap. Plages, réserves et périodes : positions et dates indicatives.</li>
           <li>Les données sont actualisées automatiquement chaque matin.</li>
@@ -382,6 +407,7 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
       <section class="prose" id="confidentialite">
         <h2>Confidentialité</h2>
         <p>Ce site ne demande aucun compte, ne dépose aucun cookie, n'affiche aucune publicité et ne mesure pas votre navigation. Il retient seulement, sur votre appareil, la dernière zone du lac que vous avez consultée.</p>
+        <p>Le bouton « Où suis-je ? » utilise la position de votre téléphone uniquement si vous l'autorisez. Elle est traitée sur votre appareil et n'est ni envoyée ni enregistrée.</p>
         <p>Pour fonctionner, la page charge ses polices depuis Google Fonts et une bibliothèque de graphiques depuis cdnjs (Cloudflare). Le site est hébergé par GitHub Pages. Comme tout hébergeur, ces services reçoivent votre adresse IP lorsqu'ils vous envoient leurs fichiers.</p>
         <p>Si vous nous écrivez, votre message et votre adresse e-mail servent uniquement à vous répondre.</p>
       </section>
@@ -465,19 +491,18 @@ const ZONES = {
     places:[["Traversée en bateau CGN","Lausanne–Évian en 35 minutes, la meilleure façon de voir le large"]]},
 };
 
+// Plages vaudoises et valaisannes : le classement officiel n'est pas publié en données ouvertes
 const BEACHES = [
-  ["Bains des Pâquis",6.153,46.211,"geneve"],["Genève-Plage",6.169,46.215,"geneve"],["Hermance",6.243,46.302,"chablais"],
-  ["Nyon",6.241,46.381,"cote"],["Rolle",6.340,46.458,"cote"],["Préverenges",6.528,46.510,"lausanne"],
-  ["Vidy",6.596,46.517,"lausanne"],["Bellerive",6.620,46.508,"lausanne"],["Pully",6.656,46.507,"lavaux"],
-  ["Vevey",6.840,46.461,"lavaux"],["Clarens",6.893,46.439,"lavaux"],["Villeneuve",6.922,46.398,"rhone"],
-  ["Saint-Gingolph",6.805,46.393,"rhone"],["Évian",6.588,46.402,"evian"],["Amphion",6.530,46.399,"evian"],
-  ["Thonon",6.496,46.383,"evian"],["Excenevex",6.355,46.349,"chablais"]];
+  ["Nyon",6.241,46.381,"cote","VD"],["Rolle",6.340,46.458,"cote","VD"],["Préverenges",6.528,46.510,"lausanne","VD"],
+  ["Vidy",6.596,46.517,"lausanne","VD"],["Bellerive",6.620,46.508,"lausanne","VD"],["Pully",6.656,46.507,"lavaux","VD"],
+  ["Vevey",6.840,46.461,"lavaux","VD"],["Clarens",6.893,46.439,"lavaux","VD"],["Villeneuve",6.922,46.398,"rhone","VD"],
+  ["Le Bouveret",6.857,46.386,"rhone","VS"]];
 const RESERVES = [
-  {name:"Réserve des Grangettes",lon:6.902,lat:46.395,r:2.1,zone:"rhone",note:"Site Ramsar. Nidification avril–juillet, hivernage novembre–mars."},
-  {name:"Delta de la Dranse",lon:6.505,lat:46.394,r:1.3,zone:"evian",note:"Réserve naturelle nationale. Oiseaux migrateurs, truites en automne."},
-  {name:"Rade de Genève",lon:6.160,lat:46.214,r:1.4,zone:"geneve",note:"Réserve d'oiseaux d'eau d'importance internationale. Hivernage novembre–mars."},
-  {name:"Embouchure de la Venoge",lon:6.540,lat:46.512,r:1.0,zone:"lausanne",note:"Roselière, fraie et nidification au printemps."},
-  {name:"Embouchure de l'Aubonne",lon:6.395,lat:46.466,r:0.9,zone:"cote",note:"Remontée des truites lacustres d'octobre à décembre."},
+  {name:"Réserve des Grangettes",lon:6.902,lat:46.395,r:2.1,zone:"rhone",note:"Site Ramsar. Nidification avril–juillet, hivernage novembre–mars.",months:{3:"nidification",4:"nidification",5:"nidification",6:"nidification",10:"hivernage des oiseaux d'eau",11:"hivernage des oiseaux d'eau",0:"hivernage des oiseaux d'eau",1:"hivernage des oiseaux d'eau",2:"hivernage des oiseaux d'eau"}},
+  {name:"Delta de la Dranse",lon:6.505,lat:46.394,r:1.3,zone:"evian",note:"Réserve naturelle nationale. Oiseaux migrateurs, truites en automne.",months:{9:"remontée des truites",10:"remontée des truites",11:"hivernage des oiseaux d'eau",0:"hivernage des oiseaux d'eau",1:"hivernage des oiseaux d'eau",2:"hivernage des oiseaux d'eau"}},
+  {name:"Rade de Genève",lon:6.160,lat:46.214,r:1.4,zone:"geneve",note:"Réserve d'oiseaux d'eau d'importance internationale. Hivernage novembre–mars.",months:{10:"hivernage des oiseaux d'eau",11:"hivernage des oiseaux d'eau",0:"hivernage des oiseaux d'eau",1:"hivernage des oiseaux d'eau",2:"hivernage des oiseaux d'eau"}},
+  {name:"Embouchure de la Venoge",lon:6.540,lat:46.512,r:1.0,zone:"lausanne",note:"Roselière, fraie et nidification au printemps.",months:{2:"fraie du brochet",3:"nidification",4:"nidification",5:"nidification",9:"remontée des truites",10:"remontée des truites"}},
+  {name:"Embouchure de l'Aubonne",lon:6.395,lat:46.466,r:0.9,zone:"cote",note:"Remontée des truites lacustres d'octobre à décembre.",months:{9:"remontée des truites",10:"remontée des truites",11:"remontée des truites"}},
 ];
 const TOWNS = [["Genève",6.146,46.204],["Nyon",6.239,46.383],["Rolle",6.337,46.460],["Morges",6.498,46.511],["Lausanne",6.633,46.522],["Vevey",6.843,46.462],["Montreux",6.911,46.433],["Villeneuve",6.927,46.397],["Évian",6.590,46.398],["Thonon",6.479,46.371],["Yvoire",6.326,46.370]];
 
@@ -531,9 +556,14 @@ RESERVES.forEach(r=>{const [x,y]=proj([r.lon,r.lat]);
   gR.append("circle").attr("class","reserve").attr("cx",x).attr("cy",y).attr("r",r.r*S)
    .on("click",()=>{select(r.zone,"visiter")}).on("mousemove",e=>tip(e,`<b>${r.name}</b><br>${r.note}`)).on("mouseleave",hideTip);});
 const gB = svg.append("g").attr("id","beaches");
-BEACHES.forEach(([n,lon,lat,z])=>{const [x,y]=proj([lon,lat]);
-  gB.append("circle").attr("class","beach").attr("cx",x).attr("cy",y).attr("r",4.2)
-   .on("click",()=>select(z,"visiter")).on("mousemove",e=>tip(e,`<b>Plage · ${n}</b><br>${tempTxt(z)} en surface`)).on("mouseleave",hideTip);});
+const qClass = q => "q-" + (q==="non classée" ? "non" : q);
+const SITES = (DATA.baignade?.sites || []).map(s => ({...s, zone: ids[vor.delaunay.find(...proj([s.lon,s.lat]))]}));
+BEACHES.forEach(([n,lon,lat,z,ct])=>{const [x,y]=proj([lon,lat]);
+  gB.append("circle").attr("class","beach").attr("cx",x).attr("cy",y).attr("r",4)
+   .on("click",()=>select(z,"visiter")).on("mousemove",e=>tip(e,`<b>${n}</b><br>Eau ${tempTxt(z)} en surface<br>Qualité : non publiée en données ouvertes (${ct})`)).on("mouseleave",hideTip);});
+SITES.forEach(s=>{const [x,y]=proj([s.lon,s.lat]);
+  gB.append("circle").attr("class","site "+qClass(s.qualite)).attr("cx",x).attr("cy",y).attr("r",3.6)
+   .on("click",()=>select(s.zone,"visiter")).on("mousemove",e=>tip(e,`<b>${s.nom}</b><br>Qualité ${s.qualite} (saison ${DATA.baignade.saison})<br>Eau ${tempTxt(s.zone)} en surface`)).on("mouseleave",hideTip);});
 
 const gL = svg.append("g");
 ids.forEach((id,i)=>{const c = d3.polygonCentroid(clipCentroidPoly(i)); const [x,y]=c||seeds[i]; const dy = id==="lausanne"?10:id==="evian"?-6:0;
@@ -572,7 +602,7 @@ function paint(){
   lg.innerHTML = (layer==="temp"
     ? `<span>Surface (1 m)</span><span class="num">${fmtT(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="num">${fmtT(dom[1])}</span>`
     : `<span>Observations</span><span class="num">${fmtN(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="num">${fmtN(dom[1])}</span>`)
-    + `<span style="display:inline-flex;gap:6px;align-items:center"><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--sand)"/></svg>Plage</span>`
+    + `<span style="display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap">Baignade : ${["excellente","bonne","insuffisante","non classée"].map(q=>`<span class="${qClass(q)}" style="display:inline-flex;gap:4px;align-items:center"><svg width="9" height="9"><circle cx="4.5" cy="4.5" r="4" style="fill:var(--q)"/></svg>${q}</span>`).join("")}</span>`
     + `<span style="display:inline-flex;gap:6px;align-items:center"><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--reed)" fill-opacity=".18" stroke="var(--reed)" stroke-dasharray="2 2"/></svg>Zone sensible</span>`;
 }
 document.querySelectorAll("[data-layer]").forEach(b=>b.addEventListener("click",()=>{
@@ -641,13 +671,20 @@ function renderTab(){
       <p class="note">CR : en danger critique · EN : en danger · VU : vulnérable · NT : quasi menacée. Le statut est mondial : une espèce peut être plus ou moins menacée en Suisse ou en France.</p>`;
   } else if(curTab==="pollution"){
     el.innerHTML = `<div class="eyebrow">Principales pressions dans cette zone</div><ul class="pressure">${Z.pressures.map(p=>`<li><span>${p}</span></li>`).join("")}</ul>
-      <p class="note">Synthèse qualitative pour la bêta. Prochaine étape : brancher les mesures de la CIPEL (phosphore, oxygène, micropolluants) et les résultats officiels de qualité de baignade.</p>`;
+      <p class="note">Synthèse qualitative pour la bêta. Les résultats officiels de qualité de baignade sont dans l'onglet Baignade et visite.</p>`;
   } else {
     const rs = RESERVES.filter(r=>r.zone===cur), bs = BEACHES.filter(b=>b[3]===cur);
-    el.innerHTML = `${Z.places.map(([n,d])=>`<div class="place"><b>${n}</b><span style="color:var(--muted);font-size:14px">${d}</span></div>`).join("")}
-      ${bs.length?`<div><div class="eyebrow" style="margin-bottom:6px">Plages de la zone</div><p>${bs.map(b=>b[0]).join(" · ")} <span class="tag">· eau ${tempTxt(cur)}</span></p></div>`:""}
+    const order = {"excellente":0,"bonne":1,"suffisante":2,"insuffisante":3,"non classée":4};
+    const ss = SITES.filter(s=>s.zone===cur).sort((a,b)=>order[a.qualite]-order[b.qualite]||a.nom.localeCompare(b.nom));
+    const cantons = [...new Set(bs.map(b=>b[4]))];
+    const offi = {VD:'<a href="https://www.vd.ch" target="_blank" rel="noopener">vd.ch</a>', VS:'<a href="https://www.vs.ch" target="_blank" rel="noopener">vs.ch</a>'};
+    el.innerHTML = `<div><div class="eyebrow" style="margin-bottom:4px">Se baigner ici · eau à ${tempTxt(cur)} en surface</div>
+      ${ss.length?`<ul class="bathing">${ss.map(s=>`<li><a href="${s.lien}" target="_blank" rel="noopener">${s.nom}</a><span class="qbadge ${qClass(s.qualite)}">${s.qualite}</span></li>`).join("")}</ul>
+        <p class="note" style="margin-top:6px">Classement officiel de la saison ${DATA.baignade.saison}, établi sur plusieurs années d'analyses. Touchez un nom pour voir les derniers prélèvements.</p>`:""}
+      ${bs.length?`<p style="margin-top:6px">${bs.map(b=>b[0]).join(" · ")}</p><p class="note">Le classement de ${cantons.map(c=>c==="VD"?"Vaud":"Valais").join(" et du ")} n'est pas publié en données ouvertes : consultez ${cantons.map(c=>offi[c]).join(" ou ")} ou votre commune.</p>`:""}
+      ${!ss.length&&!bs.length?`<p class="note">Pas de site de baignade officiel dans cette zone.</p>`:""}</div>
       ${rs.length?`<div><div class="eyebrow" style="margin-bottom:6px;color:var(--warn)">Zones à respecter</div>${rs.map(r=>`<div class="place"><b>${r.name}</b><span style="color:var(--muted);font-size:14px">${r.note}</span></div>`).join("")}</div>`:""}
-      <p class="note">Avant de vous baigner, vérifiez la qualité de l'eau publiée par le canton ou la commune.</p>`;
+      <div><div class="eyebrow" style="margin-bottom:2px">À voir</div>${Z.places.map(([n,d])=>`<div class="place"><b>${n}</b><span style="color:var(--muted);font-size:14px">${d}</span></div>`).join("")}</div>`;
   }
 }
 
@@ -747,6 +784,63 @@ if(!window.claude?.use) document.getElementById("ask").hidden = true; // hors de
     <path class="r3" d="${ridge(777, 150, 26, 0.5)}"/>
     <rect class="lake" x="0" y="150" width="${W}" height="40"/>${ripples}`;
 })();
+
+/* ---------- Où suis-je ? (la position reste sur l'appareil) ---------- */
+const locBtn = document.getElementById("locate"), whereEl = document.getElementById("whereami");
+const gMe = svg.append("g").attr("aria-hidden","true");
+if ("geolocation" in navigator) locBtn.hidden = false;
+const fmtDist = km => km < 1 ? `${Math.max(50, Math.round(km*1000/50)*50)} m` : `${km.toFixed(1).replace(".",",")} km`;
+const kmBetween = (a, b) => Math.hypot(a[0]-b[0], a[1]-b[1]) / S;
+function kmToLake(pt){
+  if (d3.polygonContains(lakePts, pt)) return 0;
+  let best = Infinity;
+  for (let i = 0; i < lakePts.length; i++) {
+    const [ax, ay] = lakePts[i], [bx, by] = lakePts[(i+1) % lakePts.length];
+    const dx = bx-ax, dy = by-ay, tt = Math.max(0, Math.min(1, ((pt[0]-ax)*dx + (pt[1]-ay)*dy) / (dx*dx + dy*dy || 1)));
+    best = Math.min(best, Math.hypot(pt[0]-ax-tt*dx, pt[1]-ay-tt*dy));
+  }
+  return best / S;
+}
+function hideWhere(){ whereEl.hidden = true; gMe.html(""); }
+function showWhere(html){ whereEl.innerHTML = html + `<button type="button" id="where-close">Masquer</button>`; whereEl.hidden = false;
+  document.getElementById("where-close").onclick = hideWhere; }
+function located(pos){
+  locBtn.removeAttribute("aria-busy");
+  const {longitude: lon, latitude: lat} = pos.coords, pt = proj([lon, lat]), dLake = kmToLake(pt);
+  if (dLake > 25) { gMe.html(""); showWhere(`<b>Vous êtes à ${Math.round(dLake)} km du Léman.</b><span>Ce bouton vous guide quand vous êtes au bord du lac.</span>`); return; }
+  const id = ids[vor.delaunay.find(pt[0], pt[1])], Z = ZONES[id];
+  gMe.html(`<circle class="me-halo" cx="${pt[0]}" cy="${pt[1]}" r="11"/><circle class="me" cx="${pt[0]}" cy="${pt[1]}" r="5"/>`);
+  select(id, "visiter");
+  const places = [...SITES.map(s => ({nom: s.nom, q: s.qualite, pt: proj([s.lon, s.lat])})),
+                  ...BEACHES.map(b => ({nom: b[0], q: null, pt: proj([b[1], b[2]])}))]
+                 .map(s => ({...s, d: kmBetween(pt, s.pt)})).sort((a, b) => a.d - b.d);
+  const near = places[0];
+  const mois = new Date().getMonth();
+  const alerts = RESERVES.map(r => ({r, d: Math.max(0, kmBetween(pt, proj([r.lon, r.lat])) - r.r)})).filter(x => x.d < 1.5).sort((a, b) => a.d - b.d);
+  const alertHtml = alerts.map(({r, d}) => {
+    const period = r.months?.[mois];
+    const where = d < 0.05 ? `Vous êtes dans le périmètre « ${r.name} »` : `Vous êtes à ${fmtDist(d)} du périmètre « ${r.name} »`;
+    return period
+      ? `<div class="alert"><strong>Période sensible :</strong> ${where}. En ce moment, ${period}. Restez sur les chemins, gardez vos distances en bateau ou en paddle, tenez les chiens en laisse.</div>`
+      : `<div class="alert calm">${where}. Pas de période sensible ce mois-ci, mais restez discret.</div>`;
+  }).join("");
+  const PRES = {geneve:"près de Genève", cote:"près de Nyon et Rolle", lausanne:"près de Lausanne et Morges", lavaux:"près de Lavaux et Montreux",
+                rhone:"près du delta du Rhône", evian:"près d'Évian et Thonon", chablais:"près d'Yvoire et Excenevex", large:"au large, sur le Grand-Lac"};
+  showWhere(`<b>Vous êtes ${PRES[id] || "près de " + Z.short}${dLake === 0 ? (id === "large" ? "" : ", sur l'eau") : `, à ${fmtDist(dLake)} du lac`}.</b>
+    <span>Eau à ${tempTxt(id)} en surface. Baignade la plus proche : ${near.nom} (${fmtDist(near.d)})${near.q ? `, qualité ${near.q}` : ""}.</span>
+    ${alertHtml}<span style="font-size:12.5px;color:var(--muted)">Votre position reste sur votre appareil : elle n'est envoyée nulle part.</span>`);
+}
+function notLocated(err){
+  locBtn.removeAttribute("aria-busy"); gMe.html("");
+  showWhere(err && err.code === 1
+    ? `<b>La localisation est désactivée.</b><span>Autorisez-la pour ce site dans les réglages de votre navigateur, puis réessayez.</span>`
+    : `<b>Position introuvable pour le moment.</b><span>Réessayez dans quelques secondes, de préférence à l'extérieur.</span>`);
+}
+locBtn.addEventListener("click", () => {
+  locBtn.setAttribute("aria-busy", "true");
+  try { navigator.geolocation.getCurrentPosition(located, notLocated, {enableHighAccuracy: true, timeout: 12000, maximumAge: 60000}); }
+  catch (e) { notLocated(null); }
+});
 
 /* ---------- onglets du site ---------- */
 const VIEWS = ["carte", "calendrier", "comprendre", "association", "contact"];
