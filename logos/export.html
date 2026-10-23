@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Export du logo · Le monde des vivants</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap">
+<style>body{font:15px system-ui;margin:24px;background:#f3f5ef;color:#1e302c} canvas{max-width:300px;border:1px solid #dbe1d5;margin:6px;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/16px 16px}</style>
+</head>
+<body>
+<p>Cette page fabrique les images du logo. Ouvrez-la avec le petit serveur d'export, puis appelez <code>exporter()</code> : chaque image est dessinée ici et enregistrée dans le projet.</p>
+<div id="out"></div>
+<script>
+const C = {disc: "#2e7a7b", mont: "#f3f5ef", mist: "#f3f5ef", ink: "#1e302c", muted: "#5b6d67",
+           sky1: "#d6e6e3", sky2: "#eef3ef", r1: "#c3d3d4", r2: "#9db6b9", r3: "#6f9095", lake: "#c5dcd8",
+           discDark: "#7cc3bf", montDark: "#13221f", dark: "#13221f", inkDark: "#e3ebe5"};
+
+// Le symbole « reflet », dessiné en vectoriel sur un canvas (repère 120 × 120)
+function symbole(ctx, x, y, size, disc = C.disc, mont = C.mont) {
+  const s = size / 120;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.beginPath(); ctx.arc(60, 60, 60, 0, Math.PI * 2); ctx.clip();
+  ctx.fillStyle = disc; ctx.fillRect(0, 0, 120, 120);
+  const poly = (pts, alpha) => { ctx.globalAlpha = alpha; ctx.beginPath(); pts.forEach(([a, b], i) => i ? ctx.lineTo(a, b) : ctx.moveTo(a, b)); ctx.closePath(); ctx.fillStyle = mont; ctx.fill(); ctx.globalAlpha = 1; };
+  poly([[0,66],[22,44],[32,52],[52,26],[66,42],[74,36],[96,58],[106,52],[120,64],[120,66]], 1);
+  poly([[0,66],[22,88],[32,80],[52,106],[66,90],[74,96],[96,74],[106,80],[120,68],[120,66]], .38);
+  ctx.strokeStyle = disc; ctx.lineWidth = 3.4; ctx.lineCap = "round";
+  for (const [x0, y0, w, h] of [[10,80,16,3],[70,86,20,3],[36,98,14,2.5]]) {
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(x0 + w / 2, y0 - h, x0 + w, y0); ctx.stroke();
+  }
+  ctx.restore();
+}
+function canvas(w, h) { const c = document.createElement("canvas"); c.width = w; c.height = h; document.getElementById("out").append(c); return c; }
+async function save(c, path) {
+  const r = await fetch("/save?path=" + encodeURIComponent(path), {method: "POST", body: c.toDataURL("image/png")});
+  return r.ok ? await r.text() : "ERREUR " + path;
+}
+
+// Icônes d'application : symbole sur fond brume (iOS arrondit lui-même les coins)
+function icone(size, part) { const c = canvas(size, size), x = c.getContext("2d");
+  x.fillStyle = C.mist; x.fillRect(0, 0, size, size); const d = size * part; symbole(x, (size - d) / 2, (size - d) / 2, d); return c; }
+
+// Logo horizontal : symbole + « Le monde / des vivants »
+function horizontal(dark) { const c = canvas(1200, 440), x = c.getContext("2d");
+  symbole(x, 20, 40, 360, dark ? C.discDark : C.disc, dark ? C.montDark : C.mont);
+  x.fillStyle = dark ? C.inkDark : C.ink; x.font = "400 150px Newsreader"; x.textBaseline = "alphabetic";
+  x.fillText("Le monde", 440, 195);
+  x.fillText("des ", 440, 365); const w = x.measureText("des ").width;
+  x.fillStyle = dark ? C.discDark : C.disc; x.font = "italic 400 150px Newsreader"; x.fillText("vivants", 440 + w, 365);
+  return c; }
+
+// Image de partage 1200 × 630 : paysage, symbole et titre
+function apercu() { const c = canvas(1200, 630), x = c.getContext("2d");
+  const g = x.createLinearGradient(0, 0, 0, 630); g.addColorStop(0, C.sky1); g.addColorStop(1, C.sky2);
+  x.fillStyle = g; x.fillRect(0, 0, 1200, 630);
+  // crêtes alpines, même principe que l'en-tête du site
+  const ridge = (seed, base, amp, rough, color) => { let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    let pts = Array.from({length: 12}, (_, i) => [i * 1200 / 11, base - amp * (0.25 + 0.75 * rnd())]), spread = amp * .7;
+    for (let k = 0; k < 6; k++) { const n = []; for (let i = 0; i < pts.length - 1; i++) { const [x1,y1] = pts[i], [x2,y2] = pts[i+1]; n.push(pts[i], [(x1+x2)/2, (y1+y2)/2 + (rnd() - .55) * spread]); } n.push(pts[pts.length-1]); pts = n; spread *= rough; }
+    x.beginPath(); x.moveTo(0, 630); pts.forEach(([a, b]) => x.lineTo(a, Math.min(base + 6, b))); x.lineTo(1200, 630); x.closePath(); x.fillStyle = color; x.fill(); };
+  ridge(9871, 540, 120, .55, C.r1); ridge(4242, 565, 70, .52, C.r2); ridge(777, 585, 30, .5, C.r3);
+  x.fillStyle = C.lake; x.fillRect(0, 585, 1200, 45);
+  symbole(x, 90, 110, 250);
+  x.fillStyle = C.ink; x.font = "400 96px Newsreader"; x.fillText("Léman Vivant", 380, 215);
+  x.fillStyle = C.disc; x.font = "italic 400 42px Newsreader"; x.fillText("L'atlas vivant du lac Léman", 384, 280);
+  x.fillStyle = C.muted; x.font = "400 30px Newsreader"; x.fillText("Le monde des vivants · lemondedesvivants.org", 384, 340);
+  return c; }
+
+// Avatar pour les réseaux sociaux (affiché en rond)
+function avatar() { const c = canvas(1080, 1080), x = c.getContext("2d"); x.fillStyle = C.mist; x.fillRect(0, 0, 1080, 1080); symbole(x, 140, 140, 800); return c; }
+function transparent(size) { const c = canvas(size, size); symbole(c.getContext("2d"), 0, 0, size); return c; }
+
+async function exporter() {
+  await document.fonts.load("400 150px Newsreader"); await document.fonts.load("italic 400 150px Newsreader");
+  const jobs = [
+    [icone(192, .86), "docs/icons/icon-192.png"], [icone(512, .86), "docs/icons/icon-512.png"],
+    [icone(512, .62), "docs/icons/maskable-512.png"], [icone(180, .84), "docs/icons/apple-touch-icon.png"],
+    [apercu(), "docs/og.png"],
+    [transparent(1024), "logos/png/symbole-1024.png"], [transparent(256), "logos/png/symbole-256.png"],
+    [horizontal(false), "logos/png/logo-horizontal.png"], [horizontal(true), "logos/png/logo-horizontal-fond-sombre.png"],
+    [avatar(), "logos/png/avatar-reseaux.png"], [apercu(), "logos/png/image-partage.png"],
+  ];
+  const res = []; for (const [c, p] of jobs) res.push(await save(c, p)); return res;
+}
+</script>
+</body>
+</html>

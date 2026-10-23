@@ -10,7 +10,7 @@ Atlas interactif du Léman : température de l'eau, faune, espèces menacées, p
 | `leman-vivant.html` | La même page, pour la version publiée sur claude.ai |
 | `outils/actualiser.py` | Récupère les données (Alplakes, GBIF) et reconstruit les deux pages |
 | `outils/template.html` | Le modèle de la page : c'est ici qu'on modifie le contenu et le design |
-| `outils/icones.py` | Redessine les icônes de l'app |
+| `logos/` | Le logo de l'association (SVG, PNG) et la page qui génère les icônes |
 | `.github/workflows/actualiser.yml` | Mise à jour automatique chaque matin sur les serveurs de GitHub |
 
 ## Commandes utiles
@@ -18,7 +18,6 @@ Atlas interactif du Léman : température de l'eau, faune, espèces menacées, p
 ```bash
 python3 outils/actualiser.py            # données du jour + reconstruction
 python3 outils/actualiser.py --build    # reconstruction seule (après une modif du modèle)
-python3 outils/icones.py                # régénérer les icônes
 ```
 
 Après une modification de `outils/template.html`, lancez `--build`, puis envoyez les changements sur GitHub (`git add -A && git commit -m "…" && git push`).

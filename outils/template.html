@@ -187,7 +187,11 @@ table.cal{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--sky)}
 .topnav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--sky) 88%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid color-mix(in srgb,var(--ridge1) 60%,transparent)}
 .topnav-inner{max-width:1180px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:space-between;gap:8px 20px;flex-wrap:wrap}
-.brand{font:italic 400 19px/1 var(--display);color:var(--ink);text-decoration:none;white-space:nowrap}
+.brand{font:italic 400 19px/1 var(--display);color:var(--ink);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:9px}
+.mark{width:26px;height:26px;flex:none;display:block}
+.mark.big{width:64px;height:64px}
+.foot-brand{display:inline-flex;align-items:center;gap:8px}
+.foot-brand .mark{width:20px;height:20px}
 .navtabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;max-width:100%}
 .navtabs::-webkit-scrollbar{display:none}
 .navtabs a{font:500 14px/1 var(--body);color:var(--muted);text-decoration:none;padding:9px 12px;border-radius:999px;white-space:nowrap}
@@ -240,9 +244,20 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mdv" viewBox="0 0 120 120">
+    <clipPath id="mdv-disc"><circle cx="60" cy="60" r="60"/></clipPath>
+    <g clip-path="url(#mdv-disc)">
+      <rect width="120" height="120" style="fill:var(--logo-disc,var(--accent))"/>
+      <path d="M0 66 L22 44 L32 52 L52 26 L66 42 L74 36 L96 58 L106 52 L120 64 V66 Z" style="fill:var(--logo-mont,var(--bg))"/>
+      <path d="M0 66 L22 88 L32 80 L52 106 L66 90 L74 96 L96 74 L106 80 L120 68 V66 Z" style="fill:var(--logo-mont,var(--bg))" fill-opacity=".38"/>
+      <path d="M10 80 q8 -3 16 0 M70 86 q10 -3 20 0 M36 98 q7 -2.5 14 0" style="stroke:var(--logo-disc,var(--accent))" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+    </g>
+  </symbol>
+</svg>
 <nav class="topnav" aria-label="Navigation principale">
   <div class="topnav-inner">
-    <a class="brand" href="#carte">Le monde des vivants</a>
+    <a class="brand" href="#carte"><svg class="mark" aria-hidden="true"><use href="#mdv"/></svg>Le monde des vivants</a>
     <div class="navtabs">
       <a href="#carte" data-nav="carte">Léman Vivant</a>
       <a href="#calendrier" data-nav="calendrier">Calendrier</a>
@@ -262,6 +277,7 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
       <p class="stamp" id="stamp"></p>
     </div>
     <div data-hero="association" hidden>
+      <svg class="mark big" aria-hidden="true"><use href="#mdv"/></svg>
       <div class="eyebrow">L'association</div>
       <h1>Le monde des vivants</h1>
       <p class="lede">Faire connaître la vie de nos lacs, des poissons des grands fonds aux oiseaux des roselières, et donner à chacun l'envie de la protéger.</p>
@@ -441,7 +457,7 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
   </section>
 
   <footer class="site-foot">
-    <span><b>Le monde des vivants</b> · association en cours de création</span>
+    <span class="foot-brand"><svg class="mark" aria-hidden="true"><use href="#mdv"/></svg><span><b>Le monde des vivants</b> · association en cours de création</span></span>
     <span><a href="#contact">contact@lemondedesvivants.org</a> · <a href="#association">Sources, confidentialité et mentions légales</a></span>
   </footer>
 </div>

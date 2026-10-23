@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pistes de logo · Le monde des vivants</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Instrument+Sans:wght@400;500&display=swap">
+<style>
+  :root{--bg:#f3f5ef;--surface:#fbfcf8;--ink:#1e302c;--muted:#5b6d67;--line:#dbe1d5;--acc:#2e7a7b;--reed:#6f8a45;--mist:#f3f5ef;--dark:#13221f}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Instrument Sans",system-ui,sans-serif}
+  main{max-width:1080px;margin:0 auto;padding:40px 20px 60px;display:grid;gap:44px}
+  h1,h2,h3{font-family:"Newsreader",Georgia,serif;font-weight:400;margin:0}
+  h1{font-size:40px} h2{font-size:28px}
+  .lede{color:var(--muted);max-width:62ch;margin-top:8px}
+  .piste{display:grid;gap:16px}
+  .piste p{color:var(--muted);max-width:66ch;margin:0}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .tile{border-radius:18px;padding:26px;display:grid;place-items:center;gap:14px;min-height:220px}
+  .light{background:var(--surface);box-shadow:0 1px 0 var(--line)}
+  .darkt{background:var(--dark);color:#e3ebe5}
+  .lockup{display:flex;align-items:center;gap:14px}
+  .word{font:400 26px/1.05 "Newsreader",Georgia,serif;letter-spacing:-.01em}
+  .word i{color:var(--acc)} .darkt .word i{color:#7cc3bf}
+  .small{font:italic 14px "Newsreader",serif;color:var(--muted)} .darkt .small{color:#9aaea6}
+  .app{width:84px;height:84px;border-radius:20px;display:grid;place-items:center;background:var(--acc)}
+  .tag{font:italic 15px "Newsreader",serif;color:var(--acc)}
+  .sub{display:grid;gap:2px}
+  .sub b{font:400 22px "Newsreader",serif}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="tag">Le monde des vivants · pistes de logo</div>
+    <h1>Trois symboles pour l'association</h1>
+    <p class="lede">Chaque piste est montrée en grand, à côté du nom, sur fond sombre et en icône d'application. Le symbole reste le même pour tous les lacs ; chaque atlas (Léman Vivant, puis les suivants) l'accompagne de son propre nom.</p>
+  </header>
+
+  <!-- Symboles réutilisables -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <!-- A. Le reflet : montagnes et leur reflet dans le lac -->
+      <clipPath id="discA"><circle cx="60" cy="60" r="56"/></clipPath>
+      <symbol id="reflet" viewBox="0 0 120 120">
+        <g clip-path="url(#discA)">
+          <rect width="120" height="120" fill="var(--c1,#2e7a7b)"/>
+          <path d="M0 66 L22 44 L32 52 L52 26 L66 42 L74 36 L96 58 L106 52 L120 64 V66 Z" fill="var(--c2,#f3f5ef)"/>
+          <path d="M52 26 L58 33.5 L54 33 L49 30 Z M74 36 L79 41 L75 41 Z" fill="var(--c1,#2e7a7b)" opacity=".25"/>
+          <path d="M0 66 L22 88 L32 80 L52 106 L66 90 L74 96 L96 74 L106 80 L120 68 V66 Z" fill="var(--c2,#f3f5ef)" opacity=".38"/>
+          <path d="M10 80 q8 -3 16 0 M70 86 q10 -3 20 0 M36 98 q7 -2.5 14 0" stroke="var(--c1,#2e7a7b)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        </g>
+      </symbol>
+      <!-- B. La goutte vivante : une goutte d'eau qui abrite un poisson -->
+      <symbol id="goutte" viewBox="0 0 120 120">
+        <path d="M60 6 C60 6 20 50 20 76 a40 40 0 0 0 80 0 C100 50 60 6 60 6 Z" fill="var(--c1,#2e7a7b)"/>
+        <path d="M33 80 C45 64 66 63 80 76 C66 90 45 94 33 80 Z" fill="var(--c2,#f3f5ef)"/>
+        <path d="M78 76 L92 66 L90 76 L92 87 Z" fill="var(--c2,#f3f5ef)"/>
+        <circle cx="45" cy="77" r="2.6" fill="var(--c1,#2e7a7b)"/>
+        <path d="M50 40 q6 -8 14 -10" stroke="var(--c2,#f3f5ef)" stroke-width="3.2" stroke-linecap="round" fill="none" opacity=".55"/>
+      </symbol>
+      <!-- C. Les ronds dans l'eau : une pousse qui sort de l'eau -->
+      <symbol id="ronds" viewBox="0 0 120 120">
+        <ellipse cx="60" cy="82" rx="50" ry="17" fill="none" stroke="var(--c1,#2e7a7b)" stroke-width="3.2" opacity=".35"/>
+        <ellipse cx="60" cy="82" rx="34" ry="11.5" fill="none" stroke="var(--c1,#2e7a7b)" stroke-width="3.6" opacity=".65"/>
+        <ellipse cx="60" cy="82" rx="18" ry="6" fill="none" stroke="var(--c1,#2e7a7b)" stroke-width="4"/>
+        <path d="M60 82 V52" stroke="var(--c3,#6f8a45)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M60 60 C46 56 40 42 44 28 C57 32 63 46 60 60 Z" fill="var(--c3,#6f8a45)"/>
+        <path d="M60 66 C72 64 80 54 80 42 C68 43 61 52 60 66 Z" fill="var(--c3,#6f8a45)" opacity=".75"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <section class="piste">
+    <h2>A · Le reflet</h2>
+    <p>Les Alpes qui se reflètent dans l'eau, dans un cercle : le paysage des lacs alpins, déjà présent en haut du site. Calme, élégant, très reconnaissable en petit.</p>
+    <div class="row">
+      <div class="tile light"><svg width="150" height="150"><use href="#reflet"/></svg></div>
+      <div class="tile light"><div class="lockup"><svg width="54" height="54"><use href="#reflet"/></svg><div class="word">Le monde<br>des <i>vivants</i></div></div></div>
+      <div class="tile darkt"><div class="lockup"><svg width="54" height="54" style="--c1:#7cc3bf;--c2:#13221f"><use href="#reflet"/></svg><div class="word">Le monde<br>des <i>vivants</i></div></div></div>
+      <div class="tile light"><div class="app" style="background:#f3f5ef;box-shadow:0 1px 0 #dbe1d5"><svg width="66" height="66"><use href="#reflet"/></svg></div><div class="sub"><b>Léman Vivant</b><span class="small">un atlas Le monde des vivants</span></div></div>
+    </div>
+  </section>
+
+  <section class="piste">
+    <h2>B · La goutte vivante</h2>
+    <p>Une goutte d'eau qui abrite un poisson : la vie à l'intérieur de l'eau. Le plus direct des trois, chaleureux, facile à comprendre pour un enfant comme pour un partenaire.</p>
+    <div class="row">
+      <div class="tile light"><svg width="150" height="150"><use href="#goutte"/></svg></div>
+      <div class="tile light"><div class="lockup"><svg width="54" height="54"><use href="#goutte"/></svg><div class="word">Le monde<br>des <i>vivants</i></div></div></div>
+      <div class="tile darkt"><div class="lockup"><svg width="54" height="54" style="--c1:#7cc3bf;--c2:#13221f"><use href="#goutte"/></svg><div class="word">Le monde<br>des <i>vivants</i></div></div></div>
+      <div class="tile light"><div class="app" style="background:#f3f5ef;box-shadow:0 1px 0 #dbe1d5"><svg width="66" height="66"><use href="#goutte"/></svg></div><div class="sub"><b>Léman Vivant</b><span class="small">un atlas Le monde des vivants</span></div></div>
+    </div>
+  </section>
+
+  <section class="piste">
+    <h2>C · Les ronds dans l'eau</h2>
+    <p>Une jeune pousse qui sort de l'eau et fait des ronds autour d'elle : la vie qui naît et rayonne, l'action de l'association qui s'étend de lac en lac. Le plus « associatif » et le plus optimiste.</p>
+    <div class="row">
+      <div class="tile light"><svg width="150" height="150"><use href="#ronds"/></svg></div>
+      <div class="tile light"><div class="lockup"><svg width="54" height="54"><use href="#ronds"/></svg><div class="word">Le monde<br>des <i>vivants</i></div></div></div>
+      <div class="tile darkt"><div class="lockup"><svg width="54" height="54" style="--c1:#7cc3bf;--c3:#a9c27a"><use href="#ronds"/></svg><div class="word">Le monde<br>des <i>vivants</i></div></div></div>
+      <div class="tile light"><div class="app" style="background:#f3f5ef;box-shadow:0 1px 0 #dbe1d5"><svg width="66" height="66"><use href="#ronds"/></svg></div><div class="sub"><b>Léman Vivant</b><span class="small">un atlas Le monde des vivants</span></div></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

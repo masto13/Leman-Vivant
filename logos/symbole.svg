@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <title>Le monde des vivants</title>
+  <defs><clipPath id="d"><circle cx="60" cy="60" r="60"/></clipPath></defs>
+  <g clip-path="url(#d)">
+    <rect width="120" height="120" fill="#2e7a7b"/>
+    <path d="M0 66 L22 44 L32 52 L52 26 L66 42 L74 36 L96 58 L106 52 L120 64 V66 Z" fill="#f3f5ef"/>
+    <path d="M0 66 L22 88 L32 80 L52 106 L66 90 L74 96 L96 74 L106 80 L120 68 V66 Z" fill="#f3f5ef" fill-opacity=".38"/>
+    <path d="M10 80 q8 -3 16 0 M70 86 q10 -3 20 0 M36 98 q7 -2.5 14 0" stroke="#2e7a7b" stroke-width="3.4" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>
