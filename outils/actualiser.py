@@ -2,11 +2,12 @@
 
 Usage : python3 outils/actualiser.py            (récupère les données et reconstruit tout)
         python3 outils/actualiser.py --build    (reconstruit seulement, avec les données existantes)
+        python3 outils/actualiser.py --photos   (cherche les photos d'espèces manquantes, puis reconstruit)
 - Récupère la température (Alplakes / Eawag) et la faune (GBIF) pour chaque zone.
 - Si une source ne répond pas, garde les données précédentes de cette zone.
 - Écrit outils/data/zones.json puis reconstruit leman-vivant.html à côté du dossier outils.
 """
-import datetime, json, math, os, re, sys, time, urllib.error, urllib.request
+import datetime, json, math, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "zones.json")
@@ -89,6 +90,88 @@ def temperature(lat, lon, now):
     return res
 
 
+# Fiches espèces : textes écrits à la main (outils/especes.json) + photo et résumé tirés de Wikipédia.
+# Les photos sont téléchargées une seule fois dans docs/especes/ (servies par le site, disponibles hors ligne).
+FICHES = os.path.join(HERE, "especes.json")
+PHOTOS = os.path.join(HERE, "data", "photos.json")
+PHOTO_DIR = os.path.join(os.path.dirname(HERE), "docs", "especes")
+WIKI_UA = "leman-vivant/0.3 (https://www.lemondedesvivants.org; contact@lemondedesvivants.org)"
+
+
+def wiki(url):
+    req = urllib.request.Request(url, headers={"User-Agent": WIKI_UA})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        time.sleep(0.3)
+        return json.loads(r.read())
+
+
+def slug(sci):
+    return re.sub(r"[^a-z]+", "-", sci.lower()).strip("-")
+
+
+def sans_html(s):
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s or "")).strip()
+
+
+def photo(sci, commons=None):
+    """Cherche la page Wikipédia de l'espèce, son image principale (libre) et son crédit.
+    `commons` : nom d'un fichier Wikimedia Commons à utiliser à la place (champ "commons" de especes.json)."""
+    q = urllib.parse.quote(sci)
+    p = wiki("https://fr.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages|extracts|info"
+             f"&piprop=name&exintro=1&explaintext=1&exsentences=3&inprop=url&titles={q}")
+    page = next(iter(p["query"]["pages"].values()))
+    out = {} if "missing" in page else {"wiki": page.get("fullurl"), "resume": (page.get("extract") or "").strip()}
+    name = commons or page.get("pageimage")
+    if not name:
+        return out
+    c = wiki("https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo"
+             f"&iiprop=url|extmetadata&iiurlwidth=480&titles=File:{urllib.parse.quote(name)}")
+    info = next(iter(c["query"]["pages"].values())).get("imageinfo", [{}])[0]
+    meta = info.get("extmetadata", {})
+    lic = meta.get("LicenseShortName", {}).get("value", "")
+    if not info.get("thumburl") or not re.search(r"CC|domain|GFDL|Public", lic, re.I):
+        return out
+    ext = ".png" if info["thumburl"].split("?")[0].lower().endswith(".png") else ".jpg"
+    fichier = slug(sci) + ext
+    os.makedirs(PHOTO_DIR, exist_ok=True)
+    req = urllib.request.Request(info["thumburl"], headers={"User-Agent": WIKI_UA})
+    with urllib.request.urlopen(req, timeout=60) as r, open(os.path.join(PHOTO_DIR, fichier), "wb") as f:
+        f.write(r.read())
+    out.update({"img": fichier, "auteur": sans_html(meta.get("Artist", {}).get("value"))[:80] or "Wikimedia Commons",
+                "licence": lic, "source": info.get("descriptionurl")})
+    return out
+
+
+def photos(res, tout=False):
+    """Complète outils/data/photos.json pour les espèces affichées qui n'ont pas encore de photo."""
+    cache = json.load(open(PHOTOS)) if os.path.exists(PHOTOS) else {}
+    fiches = json.load(open(FICHES)) if os.path.exists(FICHES) else {}
+    noms = {s["sci"] for z in res["zones"].values() for k in ("fish", "threatened") for s in (z.get(k) or [])}
+    for sci in sorted(noms):
+        choix = fiches.get(sci, {}).get("commons")
+        deja = sci in cache and (not choix or cache[sci].get("commons") == choix)
+        if deja and not (tout and not cache[sci].get("img")):
+            continue
+        try:
+            cache[sci] = photo(sci, choix)
+            if choix:
+                cache[sci]["commons"] = choix
+            print("photo", sci, "ok" if cache[sci].get("img") else "absente", flush=True)
+        except Exception as e:
+            print("photo", sci, "erreur :", e, flush=True)
+    json.dump(cache, open(PHOTOS, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+
+
+def especes():
+    """Fusionne les textes écrits à la main et les infos Wikipédia pour la page."""
+    fiches = json.load(open(FICHES)) if os.path.exists(FICHES) else {}
+    cache = json.load(open(PHOTOS)) if os.path.exists(PHOTOS) else {}
+    fiches.pop("_aide", None)
+    garder = ("nom", "groupe", "taille", "reconnaitre", "ou", "menace", "savoir", "img", "auteur", "licence", "source", "wiki", "resume")
+    return {sci: {k: v for k, v in {**cache.get(sci, {}), **fiches.get(sci, {})}.items() if k in garder}
+            for sci in set(fiches) | set(cache)}
+
+
 WEB_HEAD = """<!doctype html>
 <html lang="fr">
 <head>
@@ -129,6 +212,7 @@ def build(res):
     page = open(TEMPLATE).read()
     page = page.replace("/*DATA*/", json.dumps(res, ensure_ascii=False, separators=(",", ":")))
     page = page.replace("/*LAKE*/", json.dumps(json.load(open(LAKE)), separators=(",", ":")))
+    page = page.replace("/*SPECIES*/", json.dumps(especes(), ensure_ascii=False, separators=(",", ":")))
     open(PAGE, "w").write(page)
     print("Page reconstruite :", PAGE)
 
@@ -137,7 +221,8 @@ def build(res):
     head = page[:cut].replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
     head = head.replace("<title>Léman Vivant</title>", "<title>Léman Vivant · Le monde des vivants</title>")
     os.makedirs(os.path.dirname(WEB), exist_ok=True)
-    open(WEB, "w").write(WEB_HEAD + head + "\n</head>\n<body>\n" + page[cut:] + "\n" + WEB_FOOT)
+    body = page[cut:].replace('PHOTO_BASE = "https://www.lemondedesvivants.org/especes/"', 'PHOTO_BASE = "especes/"')
+    open(WEB, "w").write(WEB_HEAD + head + "\n</head>\n<body>\n" + body + "\n" + WEB_FOOT)
     print("App web reconstruite :", WEB)
 
 
@@ -291,6 +376,10 @@ def main():
     y, m, d = res["fetched"][:10].split("-")
     res["fetchedFr"] = f"{int(d)} {MOIS[int(m) - 1]} {y}"
     json.dump(res, open(DATA, "w"), ensure_ascii=False)
+    try:
+        photos(res)
+    except Exception as e:
+        problems.append(f"photos des espèces : {e}")
 
     build(res)
     if problems:
@@ -298,7 +387,10 @@ def main():
 
 
 if __name__ == "__main__":
-    if "--build" in sys.argv:
+    if "--photos" in sys.argv:  # cherche les photos manquantes, puis reconstruit
+        photos(json.load(open(DATA)), tout=True)
+        build(json.load(open(DATA)))
+    elif "--build" in sys.argv:
         build(json.load(open(DATA)))
     else:
         main()
