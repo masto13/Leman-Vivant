@@ -1,8 +1,8 @@
-// Mode hors ligne de Léman Vivant.
-// La page est chargée depuis le réseau en priorité (pour avoir les données du jour),
+// Mode hors ligne du site Le monde des vivants (accueil et atlas).
+// Les pages sont chargées depuis le réseau en priorité (pour avoir les données du jour),
 // et depuis le cache quand il n'y a pas de connexion.
-const CACHE = "leman-vivant-v1";
-const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
+const CACHE = "mdv-v2";
+const CORE = ["/", "/leman/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -24,9 +24,10 @@ self.addEventListener("fetch", e => {
     // réseau d'abord : les données changent chaque jour
     e.respondWith(fetch(req).then(res => {
       const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
-    }).catch(() => caches.match(req).then(r => r || caches.match("./index.html"))));
+    }).catch(() => caches.match(req, {ignoreSearch: true})
+      .then(r => r || caches.match(url.pathname.startsWith("/leman") ? "/leman/" : "/"))));
   } else if (url.origin === location.origin || isLib) {
-    // cache d'abord : icônes, bibliothèque de graphiques, polices
+    // cache d'abord : icônes, photos, bibliothèque de graphiques, polices
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => {
       if (res.ok || res.type === "opaque") { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
       return res;

@@ -14,7 +14,7 @@ DATA = os.path.join(HERE, "data", "zones.json")
 LAKE = os.path.join(HERE, "data", "lake_pts.json")
 TEMPLATE = os.path.join(HERE, "template.html")
 PAGE = os.path.join(os.path.dirname(HERE), "leman-vivant.html")
-WEB = os.path.join(os.path.dirname(HERE), "docs", "index.html")
+WEB = os.path.join(os.path.dirname(HERE), "docs", "leman", "index.html")
 
 # id, rectangle GBIF (lat min, lat max, lon min, lon max), point de température (lat, lon)
 ZONES = [
@@ -177,15 +177,15 @@ WEB_HEAD = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Léman Vivant, l'atlas du lac Léman de l'association Le monde des vivants : température de l'eau, niveau du lac, faune, espèces menacées, pollution, plages et périodes de reproduction, actualisés chaque jour.">
-<link rel="canonical" href="https://www.lemondedesvivants.org/">
+<meta name="description" content="L'atlas du Léman : température de l'eau, niveau du lac, faune, espèces menacées, plages et zones de reproduction, zone par zone et mis à jour chaque matin.">
+<link rel="canonical" href="https://www.lemondedesvivants.org/leman/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Le monde des vivants">
 <meta property="og:locale" content="fr_CH">
 <meta property="og:title" content="Léman Vivant · l'atlas vivant du lac Léman">
 <meta property="og:description" content="Température de l'eau, niveau du lac, faune, espèces menacées et zones à respecter, zone par zone et chaque jour.">
-<meta property="og:url" content="https://www.lemondedesvivants.org/">
-<meta property="og:image" content="https://www.lemondedesvivants.org/og.png">
+<meta property="og:url" content="https://www.lemondedesvivants.org/leman/">
+<meta property="og:image" content="https://www.lemondedesvivants.org/leman/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -194,13 +194,14 @@ WEB_HEAD = """<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Léman">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icons/symbole.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 """
 WEB_FOOT = """<script>
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 </script>
 </body>
 </html>
@@ -208,7 +209,7 @@ if ("serviceWorker" in navigator) addEventListener("load", () => navigator.servi
 
 
 def build(res):
-    """Écrit la page claude.ai (leman-vivant.html) et l'app web (docs/index.html)."""
+    """Écrit la page claude.ai (leman-vivant.html) et l'atlas du site (docs/leman/index.html)."""
     page = open(TEMPLATE).read()
     page = page.replace("/*DATA*/", json.dumps(res, ensure_ascii=False, separators=(",", ":")))
     page = page.replace("/*LAKE*/", json.dumps(json.load(open(LAKE)), separators=(",", ":")))
@@ -221,7 +222,8 @@ def build(res):
     head = page[:cut].replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
     head = head.replace("<title>Léman Vivant</title>", "<title>Léman Vivant · Le monde des vivants</title>")
     os.makedirs(os.path.dirname(WEB), exist_ok=True)
-    body = page[cut:].replace('PHOTO_BASE = "https://www.lemondedesvivants.org/especes/"', 'PHOTO_BASE = "especes/"')
+    body = page[cut:].replace('PHOTO_BASE = "https://www.lemondedesvivants.org/especes/"', 'PHOTO_BASE = "/especes/"')
+    body = body.replace('<a class="brand" href="#carte">', '<a class="brand" href="/">')
     open(WEB, "w").write(WEB_HEAD + head + "\n</head>\n<body>\n" + body + "\n" + WEB_FOOT)
     print("App web reconstruite :", WEB)
 

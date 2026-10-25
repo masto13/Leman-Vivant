@@ -49,7 +49,7 @@ function horizontal(dark) { const c = canvas(1200, 440), x = c.getContext("2d");
   return c; }
 
 // Image de partage 1200 × 630 : paysage, symbole et titre
-function apercu() { const c = canvas(1200, 630), x = c.getContext("2d");
+function apercu(titre, sous, pied = "Le monde des vivants · lemondedesvivants.org") { const c = canvas(1200, 630), x = c.getContext("2d");
   const g = x.createLinearGradient(0, 0, 0, 630); g.addColorStop(0, C.sky1); g.addColorStop(1, C.sky2);
   x.fillStyle = g; x.fillRect(0, 0, 1200, 630);
   // crêtes alpines, même principe que l'en-tête du site
@@ -60,9 +60,11 @@ function apercu() { const c = canvas(1200, 630), x = c.getContext("2d");
   ridge(9871, 540, 120, .55, C.r1); ridge(4242, 565, 70, .52, C.r2); ridge(777, 585, 30, .5, C.r3);
   x.fillStyle = C.lake; x.fillRect(0, 585, 1200, 45);
   symbole(x, 90, 110, 250);
-  x.fillStyle = C.ink; x.font = "400 96px Newsreader"; x.fillText("Léman Vivant", 380, 215);
-  x.fillStyle = C.disc; x.font = "italic 400 42px Newsreader"; x.fillText("L'atlas vivant du lac Léman", 384, 280);
-  x.fillStyle = C.muted; x.font = "400 30px Newsreader"; x.fillText("Le monde des vivants · lemondedesvivants.org", 384, 340);
+  x.fillStyle = C.ink; x.font = "400 96px Newsreader";
+  const t = Math.min(96, Math.floor(96 * 760 / x.measureText(titre).width)); // le titre tient dans l'image
+  x.font = `400 ${t}px Newsreader`; x.fillText(titre, 380, 215);
+  x.fillStyle = C.disc; x.font = "italic 400 42px Newsreader"; x.fillText(sous, 384, 280);
+  x.fillStyle = C.muted; x.font = "400 30px Newsreader"; x.fillText(pied, 384, 340);
   return c; }
 
 // Avatar pour les réseaux sociaux (affiché en rond)
@@ -74,10 +76,11 @@ async function exporter() {
   const jobs = [
     [icone(192, .86), "docs/icons/icon-192.png"], [icone(512, .86), "docs/icons/icon-512.png"],
     [icone(512, .62), "docs/icons/maskable-512.png"], [icone(180, .84), "docs/icons/apple-touch-icon.png"],
-    [apercu(), "docs/og.png"],
+    [apercu("Le monde des vivants", "La vie de nos lacs", "Association · lemondedesvivants.org"), "docs/og.png"],
+    [apercu("Léman Vivant", "L'atlas vivant du lac Léman"), "docs/leman/og.png"],
     [transparent(1024), "logos/png/symbole-1024.png"], [transparent(256), "logos/png/symbole-256.png"],
     [horizontal(false), "logos/png/logo-horizontal.png"], [horizontal(true), "logos/png/logo-horizontal-fond-sombre.png"],
-    [avatar(), "logos/png/avatar-reseaux.png"], [apercu(), "logos/png/image-partage.png"],
+    [avatar(), "logos/png/avatar-reseaux.png"], [apercu("Le monde des vivants", "La vie de nos lacs", "Association · lemondedesvivants.org"), "logos/png/image-partage.png"],
   ];
   const res = []; for (const [c, p] of jobs) res.push(await save(c, p)); return res;
 }

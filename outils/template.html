@@ -344,12 +344,12 @@ dialog.fiche::backdrop{background:rgba(12,28,26,.55);backdrop-filter:blur(3px)}
 
 <div class="wrap">
   <section class="view" data-view="carte" aria-label="Léman Vivant">
-    <div class="facts" aria-label="Le Léman en chiffres">
-      <div class="fact"><b>580 km²</b><span>surface, plus grand lac d'Europe occidentale</span></div>
-      <div class="fact"><b>309 m</b><span>profondeur maximale</span></div>
-      <div class="fact"><b>89 km³</b><span>volume d'eau</span></div>
-      <div class="fact"><b>≈ 11 ans</b><span>pour renouveler toute l'eau</span></div>
-      <div class="fact" id="fact-niveau"><b>372 m</b><span>altitude du plan d'eau</span></div>
+    <div class="facts" aria-label="Le Léman en chiffres" data-nosnippet>
+      <div class="fact"><b>580 km²</b> <span>surface, plus grand lac d'Europe occidentale</span></div>
+      <div class="fact"><b>309 m</b> <span>profondeur maximale</span></div>
+      <div class="fact"><b>89 km³</b> <span>volume d'eau</span></div>
+      <div class="fact"><b>≈ 11 ans</b> <span>pour renouveler toute l'eau</span></div>
+      <div class="fact" id="fact-niveau"><b>372 m</b> <span>altitude du plan d'eau</span></div>
     </div>
 
     <div class="atlas">
@@ -448,7 +448,7 @@ dialog.fiche::backdrop{background:rgba(12,28,26,.55);backdrop-filter:blur(3px)}
         <p>Chaque lac a son propre atlas, avec son nom.</p>
         <div class="atlases">
           <a class="atlas-card" href="#carte"><span class="status">En ligne</span><b>Léman Vivant</b><span>Le lac Léman, de Genève au delta du Rhône.</span></a>
-          <div class="atlas-card soon"><span class="status">En préparation</span><b>D'autres lacs</b><span>Les prochains atlas suivront, chacun sous son propre nom.</span></div>
+          <a class="atlas-card soon" href="https://www.lemondedesvivants.org/#lacs"><span class="status">En préparation</span><b>D'autres lacs</b><span>Neuchâtel, Morat, Joux : les prochains atlas suivront, chacun sous son propre nom.</span></a>
         </div>
       </section>
 
