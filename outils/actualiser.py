@@ -170,7 +170,7 @@ def especes():
     fiches.pop("_aide", None)
     garder = ("nom", "groupe", "taille", "reconnaitre", "ou", "menace", "savoir", "img", "auteur", "licence", "source", "wiki", "resume")
     return {sci: {k: v for k, v in {**cache.get(sci, {}), **fiches.get(sci, {})}.items() if k in garder}
-            for sci in set(fiches) | set(cache)}
+            for sci in sorted(set(fiches) | set(cache))}  # ordre fixe : pas de faux changements
 
 
 WEB_HEAD = """<!doctype html>
