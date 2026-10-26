@@ -8,6 +8,7 @@ Usage : python3 outils/actualiser.py            (récupère les données et reco
 - Écrit outils/data/zones.json puis reconstruit leman-vivant.html à côté du dossier outils.
 """
 import datetime, json, math, os, re, sys, time, urllib.error, urllib.parse, urllib.request
+import pages  # outils/pages.py
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "zones.json")
@@ -209,7 +210,7 @@ if ("serviceWorker" in navigator) addEventListener("load", () => navigator.servi
 
 
 def build(res):
-    """Écrit la page claude.ai (leman-vivant.html) et l'atlas du site (docs/leman/index.html)."""
+    """Écrit la page claude.ai (leman-vivant.html), l'atlas du site (docs/leman/index.html) et les pages générées (pages.py)."""
     page = open(TEMPLATE).read()
     page = page.replace("/*DATA*/", json.dumps(res, ensure_ascii=False, separators=(",", ":")))
     page = page.replace("/*LAKE*/", json.dumps(json.load(open(LAKE)), separators=(",", ":")))
@@ -224,8 +225,10 @@ def build(res):
     os.makedirs(os.path.dirname(WEB), exist_ok=True)
     body = page[cut:].replace('PHOTO_BASE = "https://www.lemondedesvivants.org/especes/"', 'PHOTO_BASE = "/especes/"')
     body = body.replace('<a class="brand" href="#carte">', '<a class="brand" href="/">')
+    body = body.replace("https://www.lemondedesvivants.org/", "/")  # liens internes du site
     open(WEB, "w").write(WEB_HEAD + head + "\n</head>\n<body>\n" + body + "\n" + WEB_FOOT)
     print("App web reconstruite :", WEB)
+    pages.construire(res, especes(), open(TEMPLATE).read())  # accueil, pages des espèces, plan du site
 
 
 # Niveau du lac : station OFEV 2027 « Lac Léman - St-Prex »

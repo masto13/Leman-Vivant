@@ -311,6 +311,7 @@ dialog.fiche::backdrop{background:rgba(12,28,26,.55);backdrop-filter:blur(3px)}
     <a class="brand" href="#carte"><svg class="mark" aria-hidden="true"><use href="#mdv"/></svg>Le monde des vivants</a>
     <div class="navtabs">
       <a href="#carte" data-nav="carte">Léman Vivant</a>
+      <a href="https://www.lemondedesvivants.org/leman/especes/">Espèces</a>
       <a href="#calendrier" data-nav="calendrier">Calendrier</a>
       <a href="#comprendre" data-nav="comprendre">Comprendre</a>
       <a href="#association" data-nav="association">L'association</a>
@@ -841,6 +842,7 @@ function renderFiche(){
       ${!texte ? `<p class="note">Cette fiche n'est pas encore rédigée. Vous connaissez bien cette espèce ? <a href="#contact" data-fiche-close>Écrivez-nous</a>.</p>` : ""}
       ${zones.length ? `<section class="fiche-sec"><h3>Observée dans le lac</h3><div class="fiche-zones">${zones.map(([id,n]) => `<button type="button" data-zone="${id}">${ZONES[id].short} <span>· ${fmtN(n)} obs.</span></button>`).join("")}</div></section>` : ""}
       <div class="fiche-links">
+        ${f.reconnaitre && f.nom ? `<a href="https://www.lemondedesvivants.org/leman/especes/${s.sci.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "")}/">Page de l'espèce</a>` : ""}
         ${f.wiki ? `<a href="${esc(f.wiki)}" target="_blank" rel="noopener">En savoir plus sur Wikipédia</a>` : ""}
         <a href="https://www.gbif.org/species/search?q=${encodeURIComponent(s.sci)}" target="_blank" rel="noopener">Toutes les observations (GBIF)</a>
       </div>

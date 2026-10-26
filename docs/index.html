@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Modèle de la page d'accueil : le script remplace SEMAINE par l'encart du jour et écrit docs/index.html -->
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -100,6 +101,16 @@ a.lake:hover{box-shadow:0 1px 0 var(--line),0 12px 28px -20px rgba(30,60,55,.45)
 .lake.soon{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 .lake.soon .status{color:var(--muted)}
 
+.week{display:grid;gap:14px;padding:22px 22px 20px;border-radius:18px;background:var(--surface);box-shadow:0 1px 0 var(--line),0 12px 32px -22px rgba(30,60,55,.35);margin-top:-24px;position:relative;z-index:2}
+.week-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px}
+.week-head h2{font-size:clamp(22px,3vw,26px)}
+.week-head span{font:italic 15px var(--display);color:var(--muted)}
+.wks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 28px}
+.wk{display:grid;gap:2px;align-content:start}
+.wk span{font-size:13px;color:var(--muted)}
+.wk b{font:400 26px/1.15 var(--display);font-variant-numeric:lining-nums}
+.wk em{font-style:normal;font-size:13.5px;color:var(--muted)}
+.week > a{font:italic 16px var(--display);justify-self:start}
 .pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-top:6px}
 .pillars h3{margin-bottom:4px}
 .pillars p{font-size:15px;color:var(--muted)}
@@ -135,6 +146,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offse
     <a class="brand" href="/"><svg class="mark" aria-hidden="true"><use href="#mdv"/></svg>Le monde des vivants</a>
     <div class="navtabs">
       <a href="#lacs">Nos lacs</a>
+      <a href="/leman/especes/">Espèces</a>
       <a href="#association">L'association</a>
       <a href="#contact">Contact</a>
     </div>
@@ -155,6 +167,12 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offse
 </header>
 
 <main class="inner">
+  <section class="week" aria-label="Cette semaine au Léman">
+    <div class="week-head"><h2>Cette semaine au Léman</h2><span>Données du 26 octobre 2026</span></div>
+    <div class="wks"><div class="wk"><span>Eau en surface à Lausanne</span><b>13,1 °C</b><em>−3,0 °C en une semaine</em></div><div class="wk"><span>Niveau du lac</span><b>372,20 m</b><em>proche de la normale</em></div><div class="wk"><span>En ce moment</span><b>Remontée de la truite lacustre</b><em></em></div></div>
+    <a href="/leman/">Voir tout l'atlas →</a>
+  </section>
+
   <section id="lacs">
     <h2>Nos lacs</h2>
     <p>Chaque lac a son propre atlas : une carte zone par zone, mise à jour chaque matin à partir de données publiques.</p>
