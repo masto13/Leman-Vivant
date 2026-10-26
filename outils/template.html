@@ -606,7 +606,8 @@ const lakePath = "M"+lakePts.map(p=>p.map(v=>v.toFixed(1)).join(",")).join("L")+
 
 const defs = svg.append("defs");
 defs.append("clipPath").attr("id","lakeclip").append("path").attr("d",lakePath);
-svg.append("text").attr("class","country").attr("x",W*0.52).attr("y",H*0.12).text("SUISSE");
+// « SUISSE » sur la grande étendue de terre au nord de la Côte, loin de la rive et des villes
+{const [x,y]=proj([6.22,46.515]); svg.append("text").attr("class","country").attr("x",x).attr("y",y).attr("text-anchor","middle").text("SUISSE");}
 svg.append("text").attr("class","country").attr("x",W*0.45).attr("y",H*0.93).text("FRANCE");
 svg.append("path").attr("d",lakePath).attr("class","lake-shadow").attr("transform","translate(0,2)");
 
