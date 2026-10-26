@@ -38,7 +38,7 @@ versAtlas(); addEventListener("hashchange", versAtlas);
 :root{
   --bg:#f3f5ef; --surface:#fbfcf8; --ink:#1e302c; --muted:#5b6d67; --line:#dbe1d5;
   --sky:#e3ece9; --ridge1:#c3d3d4; --ridge2:#9db6b9; --ridge3:#6f9095; --snow:#f7faf8;
-  --water:#c5dcd8; --accent:#2e7a7b; --accent-soft:#dcebe8; --accent-ink:#ffffff;
+  --water:#c5dcd8; --live:#3f8f52; --accent:#2e7a7b; --accent-soft:#dcebe8; --accent-ink:#ffffff;
   --display:"Newsreader", "Iowan Old Style", Georgia, serif;
   --body:"Instrument Sans", "Avenir Next", system-ui, sans-serif;
   color-scheme:light;
@@ -46,11 +46,11 @@ versAtlas(); addEventListener("hashchange", versAtlas);
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1a19; --surface:#152321; --ink:#e3ebe5; --muted:#9aaea6; --line:#273836;
   --sky:#142422; --ridge1:#1e3533; --ridge2:#284744; --ridge3:#335a57; --snow:#a9c2bd;
-  --water:#21403f; --accent:#7cc3bf; --accent-soft:#1d3634; --accent-ink:#0b1f1e; color-scheme:dark}}
+  --water:#21403f; --live:#7fcf8f; --accent:#7cc3bf; --accent-soft:#1d3634; --accent-ink:#0b1f1e; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1a19; --surface:#152321; --ink:#e3ebe5; --muted:#9aaea6; --line:#273836;
   --sky:#142422; --ridge1:#1e3533; --ridge2:#284744; --ridge3:#335a57; --snow:#a9c2bd;
-  --water:#21403f; --accent:#7cc3bf; --accent-soft:#1d3634; --accent-ink:#0b1f1e; color-scheme:dark}
+  --water:#21403f; --live:#7fcf8f; --accent:#7cc3bf; --accent-soft:#1d3634; --accent-ink:#0b1f1e; color-scheme:dark}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:64px}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.55}
@@ -92,7 +92,9 @@ section > p{color:var(--muted);max-width:66ch}
 .lake{display:grid;gap:6px;align-content:start;padding:20px 22px;border-radius:18px;background:var(--surface);box-shadow:0 1px 0 var(--line);text-decoration:none;color:var(--ink)}
 .lake b{font:400 26px/1.1 var(--display)}
 .lake span{color:var(--muted);font-size:14.5px}
-.lake .status{font:italic 15px var(--display);color:var(--accent)}
+.lake .status{display:inline-flex;align-items:center;gap:7px;font:600 11.5px/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--live);margin-bottom:4px}
+.lake .live{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 3px color-mix(in srgb,var(--live) 22%,transparent)}
+.lake span.kind{font:italic 17px/1.25 var(--display);color:var(--accent);margin-top:-2px}
 .lake em{font:italic 15px var(--display);color:var(--accent);margin-top:6px}
 a.lake:hover{box-shadow:0 1px 0 var(--line),0 12px 28px -20px rgba(30,60,55,.45)}
 .lake.soon{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
@@ -158,14 +160,30 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offse
     <p>Chaque lac a son propre atlas : une carte zone par zone, mise à jour chaque matin à partir de données publiques.</p>
     <div class="lakes">
       <a class="lake" href="/leman/">
-        <span class="status">En ligne</span>
+        <span class="status"><i class="live" aria-hidden="true"></i>En ligne</span>
         <b>Léman Vivant</b>
-        <span>De Genève au delta du Rhône : température de l'eau, niveau du lac, faune, espèces menacées, plages et périodes de reproduction.</span>
-        <em>Ouvrir l'atlas</em>
+        <span class="kind">Atlas interactif du Léman</span>
+        <span>De Genève au delta du Rhône : température de l'eau, faune, espèces menacées, plages et périodes de reproduction, mis à jour chaque matin.</span>
+        <em>Explorer l'atlas →</em>
       </a>
-      <div class="lake soon"><span class="status">En préparation</span><b>Lac de Neuchâtel</b><span>Le plus grand lac entièrement suisse, et la Grande Cariçaie sur sa rive sud.</span></div>
-      <div class="lake soon"><span class="status">En préparation</span><b>Lac de Morat</b><span>Entre Vully et Broye, relié au lac de Neuchâtel par la Broye.</span></div>
-      <div class="lake soon"><span class="status">En préparation</span><b>Lac de Joux</b><span>Le plus grand lac du Jura, à plus de 1000 mètres d'altitude.</span></div>
+      <div class="lake soon">
+        <span class="status">En préparation</span>
+        <b>Neuchâtel Vivant</b>
+        <span class="kind">Atlas du lac de Neuchâtel</span>
+        <span>Le plus grand lac entièrement suisse, ses écosystèmes et la richesse naturelle de la Grande Cariçaie.</span>
+      </div>
+      <div class="lake soon">
+        <span class="status">En préparation</span>
+        <b>Morat Vivant</b>
+        <span class="kind">Atlas du lac de Morat</span>
+        <span>Les milieux naturels d'un lac niché entre le Vully et la Broye.</span>
+      </div>
+      <div class="lake soon">
+        <span class="status">En préparation</span>
+        <b>Joux Vivant</b>
+        <span class="kind">Atlas du lac de Joux</span>
+        <span>La biodiversité du plus grand lac du massif jurassien, à plus de 1000 mètres d'altitude.</span>
+      </div>
     </div>
   </section>
 
