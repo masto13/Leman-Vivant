@@ -209,6 +209,12 @@ if ("serviceWorker" in navigator) addEventListener("load", () => navigator.servi
 """
 
 
+GOOGLE_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap">"""
+CONFIDENTIALITE_CLAUDE = "Pour fonctionner, la page charge ses polices depuis Google Fonts et une bibliothèque de graphiques depuis cdnjs (Cloudflare). Le site est hébergé par GitHub Pages. Comme tout hébergeur, ces services reçoivent votre adresse IP lorsqu'ils vous envoient leurs fichiers."
+CONFIDENTIALITE_WEB = "Les polices et la bibliothèque de graphiques sont hébergées avec le site : aucun service tiers n'est appelé pendant votre visite. Le site est hébergé par GitHub Pages, qui reçoit, comme tout hébergeur, votre adresse IP lorsqu'il vous envoie les pages."
+
+
 def build(res):
     """Écrit la page claude.ai (leman-vivant.html), l'atlas du site (docs/leman/index.html) et les pages générées (pages.py)."""
     page = open(TEMPLATE).read()
@@ -222,10 +228,13 @@ def build(res):
     cut = page.index("</style>") + len("</style>")
     head = page[:cut].replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
     head = head.replace("<title>Léman Vivant</title>", "<title>Léman Vivant · Le monde des vivants</title>")
+    head = head.replace(GOOGLE_FONTS, pages.polices())  # polices hébergées avec le site
     os.makedirs(os.path.dirname(WEB), exist_ok=True)
     body = page[cut:].replace('PHOTO_BASE = "https://www.lemondedesvivants.org/especes/"', 'PHOTO_BASE = "/especes/"')
     body = body.replace('<a class="brand" href="#carte">', '<a class="brand" href="/">')
     body = body.replace("https://www.lemondedesvivants.org/", "/")  # liens internes du site
+    body = body.replace("https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js", "/lib/d3.min.js")  # bibliothèque de la carte hébergée avec le site
+    body = body.replace(CONFIDENTIALITE_CLAUDE, CONFIDENTIALITE_WEB)
     open(WEB, "w").write(WEB_HEAD + head + "\n</head>\n<body>\n" + body + "\n" + WEB_FOOT)
     print("App web reconstruite :", WEB)
     pages.construire(res, especes(), open(TEMPLATE).read())  # accueil, pages des espèces, plan du site

@@ -1,8 +1,10 @@
 // Mode hors ligne du site Le monde des vivants (accueil et atlas).
 // Les pages sont chargées depuis le réseau en priorité (pour avoir les données du jour),
 // et depuis le cache quand il n'y a pas de connexion.
-const CACHE = "mdv-v3";
-const CORE = ["/", "/leman/"];
+const CACHE = "mdv-v4";
+// mis en cache dès la première visite : l'atlas marche ensuite sans connexion
+const CORE = ["/", "/leman/", "/lib/d3.min.js", "/fonts/newsreader-normal-latin.woff2",
+  "/fonts/newsreader-italic-latin.woff2", "/fonts/instrument-sans-normal-latin.woff2"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

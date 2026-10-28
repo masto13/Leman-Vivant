@@ -16,6 +16,7 @@ Site de l'association Le monde des vivants (www.lemondedesvivants.org) : une pag
 | `outils/template.html` | Le modèle de la page : c'est ici qu'on modifie le contenu et le design |
 | `outils/especes.json` | Les fiches espèces écrites à la main (comment la reconnaître, où la voir, le saviez-vous). Chaque fiche avec un nom et « reconnaitre » obtient sa page |
 | `docs/especes/` | Les photos des espèces (Wikimedia Commons, licences libres, crédits dans `outils/data/photos.json`) |
+| `docs/fonts/`, `docs/lib/` | Les polices (Newsreader, Instrument Sans) et la bibliothèque de la carte (d3), hébergées avec le site : aucun service tiers n'est appelé pendant la visite |
 | `logos/` | Le logo de l'association (SVG, PNG) et la page qui génère les icônes et les images d'aperçu (`docs/og.png`, `docs/leman/og.png`) |
 | `.github/workflows/actualiser.yml` | Mise à jour automatique chaque matin sur les serveurs de GitHub |
 

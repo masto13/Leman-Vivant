@@ -151,6 +151,14 @@ CSS_CARTE = """
 SYMBOLE = """<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mdv" viewBox="0 0 120 120"><clipPath id="mdv-disc"><circle cx="60" cy="60" r="60"/></clipPath><g clip-path="url(#mdv-disc)"><rect width="120" height="120" style="fill:var(--accent)"/><path d="M0 66 L22 44 L32 52 L52 26 L66 42 L74 36 L96 58 L106 52 L120 64 V66 Z" style="fill:var(--bg)"/><path d="M0 66 L22 88 L32 80 L52 106 L66 90 L74 96 L96 74 L106 80 L120 68 V66 Z" style="fill:var(--bg)" fill-opacity=".38"/><path d="M10 80 q8 -3 16 0 M70 86 q10 -3 20 0 M36 98 q7 -2.5 14 0" style="stroke:var(--accent)" stroke-width="3.4" stroke-linecap="round" fill="none"/></g></symbol></svg>"""
 
 
+def polices():
+    """Polices hébergées avec le site : les deux plus utilisées préchargées, les @font-face en ligne."""
+    css = open(os.path.join(DOCS, "fonts", "fonts.css")).read().split("\n", 1)[1].strip()
+    return ('<link rel="preload" href="/fonts/newsreader-normal-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
+            '<link rel="preload" href="/fonts/instrument-sans-normal-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
+            f"<style>{css}</style>")
+
+
 def page(titre, description, chemin, corps, css, image=None, jsonld=None, actif=None):
     """Squelette commun : en-tête pour Google et les aperçus de liens, navigation, pied de page."""
     url = SITE + chemin
@@ -180,8 +188,7 @@ def page(titre, description, chemin, corps, css, image=None, jsonld=None, actif=
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/icons/symbole.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
-{ld}<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap">
+{ld}{polices()}
 <style>{CSS}{css}</style>
 </head>
 <body>
@@ -360,7 +367,7 @@ def construire(res, especes, template):
     open(os.path.join(racine, "index.html"), "w").write(page_liste(fiches, obs))
 
     # accueil
-    acc = open(ACCUEIL).read().replace("<!--SEMAINE-->", semaine(res, cal))
+    acc = open(ACCUEIL).read().replace("<!--SEMAINE-->", semaine(res, cal)).replace("<!--POLICES-->", polices())
     open(os.path.join(DOCS, "index.html"), "w").write(acc)
 
     # plan du site

@@ -250,7 +250,9 @@ body:not([data-now="carte"]) [data-hero="leman"] :is(.lede,.stamp){display:none}
 @media (max-width:640px){.topnav-inner{padding-block:8px 6px}.navtabs{width:100%;margin-inline:-6px;-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent);padding-right:28px}.navtabs a{padding:8px 10px;font-size:13.5px}}
 
 @media (max-width:900px){.atlas{grid-template-columns:1fr}}
-@media (max-width:520px){.hero-inner{padding-block:28px 120px}.hero svg.alps{height:140px}.facts{gap:14px 28px}.fact b{font-size:25px}.bar{grid-template-columns:80px 1fr 58px}}
+/* téléphone : en-tête plus court et carte avant les chiffres, pour voir le lac sans faire défiler */
+@media (max-width:520px){.hero .lede{font-size:15.5px}.hero h1{font-size:44px}[data-view="carte"] > .atlas{order:-1}}
+@media (max-width:520px){.hero-inner{padding-block:22px 84px}.hero svg.alps{height:100px}.facts{gap:14px 28px}.fact b{font-size:25px}.bar{grid-template-columns:80px 1fr 58px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* ---------- fiche espèce ---------- */
 dialog.fiche{border:0;padding:0;margin:auto;width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 48px);border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 24px 70px rgba(10,30,28,.35);overflow:hidden}
@@ -670,7 +672,7 @@ const temps = ids.map(surf).filter(v=>v!=null);
 const tScale = d3.scaleSequential(d3.interpolateRgbBasis(["#7aa7c4","#9fcbc8","#cfdcb4","#e4c48f"])).domain([Math.floor(d3.min(temps)*2)/2-0.5, Math.ceil(d3.max(temps)*2)/2+0.5]);
 const totals = ids.map(id=>DATA.zones[id].total);
 const bScale = d3.scaleSequentialLog(d3.interpolateRgbBasis(["#e2ecd9","#b7d0a3","#86ad78","#5a8a5e"])).domain([d3.min(totals),d3.max(totals)]);
-const fmtN = n => n.toLocaleString("fr-CH");
+const NF = new Intl.NumberFormat("fr-CH"), fmtN = n => NF.format(n); // un seul formateur, réutilisé
 function layerTip(id){return layer==="temp" ? `${tempTxt(id)} à 1 m de profondeur` : `${fmtN(DATA.zones[id].total)} observations naturalistes`}
 function paint(){
   ids.forEach(id=>zoneEls[id].attr("fill", layer==="temp" ? tScale(surf(id)) : bScale(DATA.zones[id].total)));
@@ -798,7 +800,9 @@ if (DATA.niveau) {
     <line x1="2" x2="${w-2}" y1="${Y(N.normale)}" y2="${Y(N.normale)}" stroke="var(--muted)" stroke-dasharray="2 2" stroke-width="1"/>
     <polyline points="${ys.map((v,i)=>X(i)+","+Y(v)).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
     <circle cx="${X(ys.length-1)}" cy="${Y(ys[ys.length-1])}" r="2.4" fill="var(--accent)"/></svg>` : "";
-  const heure = new Date(N.time).toLocaleString("fr-CH",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
+  // date écrite à la main : la mise en forme par le navigateur (Intl) coûte cher au premier appel sur téléphone
+  const MOIS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const heure = `${+N.time.slice(8,10)} ${MOIS_FR[+N.time.slice(5,7)-1]}, ${N.time.slice(11,16)}`;
   const alerte = N.danger>=2;
   const el = document.getElementById("fact-niveau");
   el.title = `Mesure OFEV à St-Prex le ${heure} : ${N.last.toFixed(3)} m. Normale du jour (${N.periode}) : ${N.normale.toFixed(3)} m. Variation sur 24 h : ${cm(N.veille_cm)}. Ligne pointillée : la normale ; courbe : les 40 derniers jours.`;
