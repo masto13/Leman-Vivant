@@ -1,6 +1,7 @@
 {
  "chablais": {
   "auteur": "Jean-Christophe BENOIST",
+  "choix": "Yvoire|Excenevex",
   "commons": "Yvoire_-_Vu_du_Léman.jpg",
   "img": "chablais.jpg",
   "licence": "CC BY-SA 4.0",
@@ -8,6 +9,7 @@
  },
  "cote": {
   "auteur": "Jérémy Toma",
+  "choix": "Rolle|Nyon",
   "commons": "Nyon_(VD).jpg",
   "img": "cote.jpg",
   "licence": "CC BY-SA 4.0",
@@ -15,20 +17,15 @@
  },
  "evian": {
   "auteur": "Dmnt44",
+  "choix": "Évian-les-Bains|Thonon-les-Bains",
   "commons": "Evian_par_le_lac.jpg",
   "img": "evian.jpg",
   "licence": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:Evian_par_le_lac.jpg"
  },
- "geneve": {
-  "auteur": "Dmitry A. Mottl",
-  "commons": "Lake_Geneva_from_Chillon_Castle.jpg",
-  "img": "geneve.jpg",
-  "licence": "CC BY-SA 4.0",
-  "source": "https://commons.wikimedia.org/wiki/File:Lake_Geneva_from_Chillon_Castle.jpg"
- },
  "large": {
   "auteur": "Dmitry A. Mottl",
+  "choix": "Léman",
   "commons": "Lake_Geneva_from_Chillon_Castle.jpg",
   "img": "large.jpg",
   "licence": "CC BY-SA 4.0",
@@ -36,6 +33,7 @@
  },
  "lausanne": {
   "auteur": "Rama",
+  "choix": "Ouchy|Lausanne",
   "commons": "Ouchy_img_0584.jpg",
   "img": "lausanne.jpg",
   "licence": "CC BY-SA 2.0 fr",
@@ -43,16 +41,10 @@
  },
  "lavaux": {
   "auteur": "Lorenz Poffet",
+  "choix": "Lavaux",
   "commons": "Lavaux_Switzerland.jpg",
   "img": "lavaux.jpg",
   "licence": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:Lavaux_Switzerland.jpg"
- },
- "rhone": {
-  "auteur": "Christophe95",
-  "commons": "Église_de_Grangettes.jpg",
-  "img": "rhone.jpg",
-  "licence": "CC BY-SA 3.0",
-  "source": "https://commons.wikimedia.org/wiki/File:%C3%89glise_de_Grangettes.jpg"
  }
 }

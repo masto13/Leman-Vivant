@@ -178,10 +178,16 @@ def photos_zones(tout=False):
             continue
         old = cache.get(zid, {})
         deja = old.get("img") and os.path.exists(os.path.join(ZONES_DIR, old["img"])) and not old.get("membre")
-        if deja and not tout and (not c.get("commons") or old.get("commons") == c["commons"]):
+        choix = c.get("commons") or c.get("recherche") or "|".join(c.get("wiki", []))
+        if deja and not tout and old.get("choix") == choix:
             continue
         try:
             noms = [c["commons"]] if c.get("commons") else []
+            if c.get("recherche"):  # recherche directe dans Commons (photos uniquement)
+                r = wiki("https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srnamespace=6"
+                         f"&srlimit=8&srsearch={urllib.parse.quote(c['recherche'])}")
+                noms += [x["title"].split(":", 1)[1] for x in r["query"]["search"]
+                         if x["title"].lower().endswith((".jpg", ".jpeg")) and not PAS_UNE_PHOTO.search(x["title"])]
             for titre in c.get("wiki", []):
                 p = wiki("https://fr.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages"
                          f"&piprop=name&titles={urllib.parse.quote(titre)}")
@@ -191,14 +197,31 @@ def photos_zones(tout=False):
             for nom in noms:
                 r = photo_commons(nom, zid)
                 if r:
-                    cache[zid] = r
+                    cache[zid] = {**r, "choix": choix}
                     print("photo de zone", zid, ":", nom, flush=True)
                     break
             else:
                 print("photo de zone", zid, ": aucune photo libre trouvée", flush=True)
         except Exception as e:
             print("photo de zone", zid, "erreur :", e, flush=True)
+    alleger(ZONES_DIR)
     json.dump(cache, open(ZONES_PHOTOS, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+
+
+def alleger(dossier, largeur=960, max_ko=180):
+    """Réduit les photos trop lourdes (largeur 960 px, JPEG qualité 78), pour un site rapide sur téléphone."""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("Pillow absent : photos non allégées", flush=True)
+        return
+    for f in os.listdir(dossier):
+        p = os.path.join(dossier, f)
+        if f.lower().endswith((".jpg", ".jpeg")) and os.path.getsize(p) > max_ko * 1024:
+            im = Image.open(p).convert("RGB")
+            im.thumbnail((largeur, largeur * 2))
+            im.save(p, "JPEG", quality=78, optimize=True, progressive=True)
+            print("photo allégée", f, os.path.getsize(p) // 1024, "Ko", flush=True)
 
 
 def photos(res, tout=False):

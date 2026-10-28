@@ -23,6 +23,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Installer Pillow (allègement des photos)
+        run: pip install --quiet pillow
+
       - name: Récupérer les données et reconstruire le site
         run: python3 outils/actualiser.py
 
