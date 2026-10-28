@@ -23,6 +23,14 @@
   "licence": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:Evian_par_le_lac.jpg"
  },
+ "geneve": {
+  "auteur": "Gzzz",
+  "choix": "Jet d'eau Genève rade",
+  "commons": "Rade de Genève 2012.jpg",
+  "img": "geneve.jpg",
+  "licence": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Rade_de_Gen%C3%A8ve_2012.jpg"
+ },
  "large": {
   "auteur": "Dmitry A. Mottl",
   "choix": "Léman",
@@ -46,5 +54,13 @@
   "img": "lavaux.jpg",
   "licence": "CC BY-SA 4.0",
   "source": "https://commons.wikimedia.org/wiki/File:Lavaux_Switzerland.jpg"
+ },
+ "rhone": {
+  "auteur": "Christian David",
+  "choix": "Grangettes Noville réserve Léman",
+  "commons": "Le Grand Canal des Grangettes vers le Léman.jpg",
+  "img": "rhone.jpg",
+  "licence": "CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Le_Grand_Canal_des_Grangettes_vers_le_L%C3%A9man.jpg"
  }
 }
