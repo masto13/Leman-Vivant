@@ -143,6 +143,64 @@ def photo(sci, commons=None):
     return out
 
 
+ZONES_CFG = os.path.join(HERE, "zones.json")
+ZONES_PHOTOS = os.path.join(HERE, "data", "zones-photos.json")
+ZONES_DIR = os.path.join(os.path.dirname(HERE), "docs", "zones")
+PAS_UNE_PHOTO = re.compile(r"blason|armoiries|wappen|coat.of.arms|map|carte|karte|locator|location|logo|flag|drapeau|\.svg$", re.I)
+
+
+def photo_commons(nom, fichier, largeur=1000):
+    """Télécharge une vignette libre de droits d'un fichier Commons dans docs/zones/ ; renvoie son crédit."""
+    c = wiki("https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo"
+             f"&iiprop=url|extmetadata&iiurlwidth={largeur}&titles=File:{urllib.parse.quote(nom)}")
+    info = next(iter(c["query"]["pages"].values())).get("imageinfo", [{}])[0]
+    meta = info.get("extmetadata", {})
+    lic = meta.get("LicenseShortName", {}).get("value", "")
+    if not info.get("thumburl") or not re.search(r"CC|domain|GFDL|Public", lic, re.I):
+        return None
+    ext = ".png" if info["thumburl"].split("?")[0].lower().endswith(".png") else ".jpg"
+    os.makedirs(ZONES_DIR, exist_ok=True)
+    req = urllib.request.Request(info["thumburl"], headers={"User-Agent": WIKI_UA})
+    with urllib.request.urlopen(req, timeout=60) as r, open(os.path.join(ZONES_DIR, fichier + ext), "wb") as f:
+        f.write(r.read())
+    return {"img": fichier + ext, "auteur": sans_html(meta.get("Artist", {}).get("value"))[:80] or "Wikimedia Commons",
+            "licence": lic, "source": info.get("descriptionurl"), "commons": nom}
+
+
+def photos_zones(tout=False):
+    """Une photo par zone de l'atlas : photo d'un membre si elle existe, sinon Wikimedia Commons."""
+    cfg = json.load(open(ZONES_CFG)) if os.path.exists(ZONES_CFG) else {}
+    cfg.pop("_aide", None)
+    cache = json.load(open(ZONES_PHOTOS)) if os.path.exists(ZONES_PHOTOS) else {}
+    for zid, c in cfg.items():
+        if c.get("membre"):  # photo d'un membre : rien à télécharger
+            cache[zid] = {**c["membre"], "img": c["membre"]["fichier"], "membre": True}
+            continue
+        old = cache.get(zid, {})
+        deja = old.get("img") and os.path.exists(os.path.join(ZONES_DIR, old["img"])) and not old.get("membre")
+        if deja and not tout and (not c.get("commons") or old.get("commons") == c["commons"]):
+            continue
+        try:
+            noms = [c["commons"]] if c.get("commons") else []
+            for titre in c.get("wiki", []):
+                p = wiki("https://fr.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages"
+                         f"&piprop=name&titles={urllib.parse.quote(titre)}")
+                nom = next(iter(p["query"]["pages"].values())).get("pageimage")
+                if nom and not PAS_UNE_PHOTO.search(nom):
+                    noms.append(nom)
+            for nom in noms:
+                r = photo_commons(nom, zid)
+                if r:
+                    cache[zid] = r
+                    print("photo de zone", zid, ":", nom, flush=True)
+                    break
+            else:
+                print("photo de zone", zid, ": aucune photo libre trouvée", flush=True)
+        except Exception as e:
+            print("photo de zone", zid, "erreur :", e, flush=True)
+    json.dump(cache, open(ZONES_PHOTOS, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+
+
 def photos(res, tout=False):
     """Complète outils/data/photos.json pour les espèces affichées qui n'ont pas encore de photo."""
     cache = json.load(open(PHOTOS)) if os.path.exists(PHOTOS) else {}
@@ -221,6 +279,9 @@ def build(res):
     page = page.replace("/*DATA*/", json.dumps(res, ensure_ascii=False, separators=(",", ":")))
     page = page.replace("/*LAKE*/", json.dumps(json.load(open(LAKE)), separators=(",", ":")))
     page = page.replace("/*SPECIES*/", json.dumps(especes(), ensure_ascii=False, separators=(",", ":")))
+    zp = json.load(open(ZONES_PHOTOS)) if os.path.exists(ZONES_PHOTOS) else {}
+    zp = {z: {k: v for k, v in p.items() if k in ("img", "auteur", "licence", "source", "membre")} for z, p in sorted(zp.items()) if p.get("img")}
+    page = page.replace("/*ZPHOTOS*/", json.dumps(zp, ensure_ascii=False, separators=(",", ":")))
     open(PAGE, "w").write(page)
     print("Page reconstruite :", PAGE)
 
@@ -394,6 +455,10 @@ def main():
         photos(res)
     except Exception as e:
         problems.append(f"photos des espèces : {e}")
+    try:
+        photos_zones()
+    except Exception as e:
+        problems.append(f"photos des zones : {e}")
 
     build(res)
     if problems:
@@ -403,6 +468,7 @@ def main():
 if __name__ == "__main__":
     if "--photos" in sys.argv:  # cherche les photos manquantes, puis reconstruit
         photos(json.load(open(DATA)), tout=True)
+        photos_zones()
         build(json.load(open(DATA)))
     elif "--build" in sys.argv:
         build(json.load(open(DATA)))

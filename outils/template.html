@@ -111,6 +111,11 @@ svg.map{display:block;width:100%;height:auto}
 
 .sheet{background:var(--surface);border-radius:18px;display:grid;min-width:0;box-shadow:0 1px 0 var(--line),0 12px 32px -22px rgba(30,60,55,.35)}
 .sheet-head{padding:22px 22px 10px;display:grid;gap:6px}
+.z-photo{margin:0;position:relative;border-radius:18px 18px 0 0;overflow:hidden;background:var(--water)}
+.z-photo img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;opacity:0;transition:opacity .35s ease}
+.z-photo img.on{opacity:1}
+.z-photo figcaption{position:absolute;right:8px;bottom:8px;max-width:85%;font-size:11px;line-height:1.3;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.z-photo figcaption a{color:#fff}
 .sheet-head p{color:var(--muted);font-size:14.5px}
 .tabs{display:flex;gap:4px;padding:6px 14px;overflow-x:auto;border-bottom:1px solid var(--line)}
 .tab{font:500 14px var(--body);padding:9px 10px;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:999px;white-space:nowrap}
@@ -373,6 +378,7 @@ dialog.fiche::backdrop{background:rgba(12,28,26,.55);backdrop-filter:blur(3px)}
       </div>
 
       <aside class="sheet" aria-live="polite">
+        <figure class="z-photo" id="z-photo" hidden><img alt="" decoding="async"><figcaption></figcaption></figure>
         <div class="sheet-head">
           <div class="eyebrow" id="z-eyebrow"></div>
           <h2 id="z-name"></h2>
@@ -529,6 +535,7 @@ dialog.fiche::backdrop{background:rgba(12,28,26,.55);backdrop-filter:blur(3px)}
 const DATA = /*DATA*/;
 const LAKE = /*LAKE*/;
 const SPECIES = /*SPECIES*/;
+const ZPHOTOS = /*ZPHOTOS*/, ZPHOTO_BASE = "https://www.lemondedesvivants.org/zones/";
 const PHOTO_BASE = "https://www.lemondedesvivants.org/especes/";
 
 const NAMES = {"Gobio gobio":"Goujon","Phoxinus phoxinus":"Vairon","Tinca tinca":"Tanche","Scardinius erythrophthalmus":"Rotengle","Esox lucius":"Brochet","Rutilus rutilus":"Gardon","Lota lota":"Lotte","Lepomis gibbosus":"Perche-soleil","Ameiurus melas":"Poisson-chat","Cyprinus carpio":"Carpe commune","Anguilla anguilla":"Anguille européenne","Oncorhynchus mykiss":"Truite arc-en-ciel","Salmo trutta":"Truite (lacustre et de rivière)","Coregonus lavaretus":"Féra (corégone)","Coregonus palaea":"Palée (corégone)","Arenaria interpres":"Tournepierre à collier","Alectoris graeca":"Perdrix bartavelle","Alburnoides bipunctatus":"Spirlin","Clangula hyemalis":"Harelde boréale","Emys orbicularis":"Cistude d'Europe","Lycaena dispar":"Cuivré des marais","Astacus astacus":"Écrevisse à pattes rouges","Perca fluviatilis":"Perche","Salvelinus umbla":"Omble chevalier","Cottus gobio":"Chabot","Formica polyctena":"Fourmi des bois","Gomphus pulchellus":"Gomphe joli"};
@@ -694,12 +701,30 @@ document.querySelectorAll("[data-overlay]").forEach(b=>b.addEventListener("click
 
 /* ---------- zone sheet ---------- */
 let cur = "lausanne", curTab = "eau";
+// photo de la zone : chargée seulement quand on choisit la zone, avec un léger fondu
+function showZonePhoto(id){
+  const p = ZPHOTOS[id], fig = document.getElementById("z-photo");
+  if (!p) { fig.hidden = true; return; }
+  const img = fig.querySelector("img"), src = ZPHOTO_BASE + p.img;
+  fig.hidden = false;
+  if (img.getAttribute("src") !== src) {
+    img.classList.remove("on");
+    img.onload = () => img.classList.add("on");
+    img.onerror = () => { fig.hidden = true; };
+    img.src = src;
+  }
+  img.alt = ZONES[id].name;
+  const e = t => String(t ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const qui = p.source ? `<a href="${e(p.source)}" target="_blank" rel="noopener">${e(p.auteur)}</a>` : e(p.auteur);
+  fig.querySelector("figcaption").innerHTML = `Photo : ${qui}${p.membre ? " (membre)" : ""}${p.licence ? " · " + e(p.licence) : ""}`;
+}
 function select(id,tab){cur=id; if(tab) curTab=tab;
   ids.forEach(z=>zoneEls[z].classed("sel",z===id));
   const Z = ZONES[id];
   document.getElementById("z-eyebrow").textContent = Z.side;
   document.getElementById("z-name").textContent = Z.name;
   document.getElementById("z-desc").textContent = Z.desc;
+  showZonePhoto(id);
   renderTab(); renderSuggest();
   try{localStorage.setItem("leman-zone",id)}catch(e){}
 }

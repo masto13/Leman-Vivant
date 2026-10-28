@@ -1,0 +1,11 @@
+{
+ "_aide": "Photo de chaque zone de l'atlas. Par défaut, le script prend l'image principale du premier article Wikipédia de la liste « wiki » qui a une vraie photo libre de droits. « commons » : nom exact d'un fichier Wikimedia Commons pour imposer une photo. « membre » : photo d'un membre, déposée dans docs/zones/ (ex. {\"fichier\": \"lavaux.jpg\", \"auteur\": \"Prénom Nom\", \"licence\": \"avec son accord\"}) ; elle remplace alors Wikimedia. Après une modification : python3 outils/actualiser.py --photos",
+ "geneve":   {"wiki": ["Rade de Genève", "Jet d'eau de Genève"]},
+ "cote":     {"wiki": ["Rolle", "Nyon"]},
+ "lausanne": {"wiki": ["Ouchy", "Lausanne"]},
+ "lavaux":   {"wiki": ["Lavaux"]},
+ "rhone":    {"wiki": ["Réserve naturelle des Grangettes", "Grangettes", "Villeneuve (Vaud)"]},
+ "evian":    {"wiki": ["Évian-les-Bains", "Thonon-les-Bains"]},
+ "chablais": {"wiki": ["Yvoire", "Excenevex"]},
+ "large":    {"wiki": ["Léman"]}
+}
