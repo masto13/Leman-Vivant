@@ -164,7 +164,7 @@ def page(titre, description, chemin, corps, css, image=None, jsonld=None, actif=
     """Squelette commun : en-tête pour Google et les aperçus de liens, navigation, pied de page."""
     url = SITE + chemin
     image = image or SITE + "/leman/og.png"
-    nav = [("/leman/", "Léman Vivant", "atlas"), ("/leman/especes/", "Espèces", "especes"),
+    nav = [("/leman/", "Léman Vivant", "atlas"), ("/leman/especes/", "Espèces", "especes"), ("/leman/histoire/", "Histoire", "histoire"),
            ("/#association", "L'association", None), ("/#contact", "Contact", None)]
     cur = ' aria-current="page"'
     liens = "".join(f'<a href="{h}"{cur if k and k == actif else ""}>{t}</a>' for h, t, k in nav)
@@ -309,6 +309,42 @@ def page_liste(fiches, obs):
     return page("Les espèces du Léman · Léman Vivant", desc, "/leman/especes/", corps, CSS_LISTE + CSS_CARTE, actif="especes")
 
 
+CSS_HISTOIRE = """
+.intro{display:grid;gap:10px;max-width:66ch}
+.intro p{color:var(--muted);font-size:17px}
+.relecture{font:italic 15px var(--display);color:var(--muted);background:var(--accent-soft);border-radius:12px;padding:10px 14px;max-width:66ch}
+.frise{list-style:none;margin:0;padding:0;display:grid;gap:0;max-width:760px}
+.etape{position:relative;display:grid;gap:8px;padding:0 0 34px 34px;border-left:2px solid var(--line);margin-left:9px}
+.etape:last-child{border-left-color:transparent;padding-bottom:4px}
+.etape::before{content:"";position:absolute;left:-10px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--accent)}
+.etape .date{font:italic 16px/1.2 var(--display);color:var(--accent)}
+.etape h2{font-size:clamp(22px,3vw,27px)}
+.etape p{color:var(--ink);max-width:62ch}
+.etape .src{font-size:13px;color:var(--muted)}
+.etape .src a{color:var(--muted)}
+"""
+
+
+def page_histoire():
+    """Frise « Histoire du Léman », écrite dans outils/histoire.json."""
+    d = json.load(open(os.path.join(HERE, "histoire.json")))
+    etapes = []
+    for x in d["etapes"]:
+        src = " · ".join(f'<a href="{e(u)}" target="_blank" rel="noopener">{e(n)}</a>' for n, u in x.get("sources", []))
+        etapes.append(f'<li class="etape"><span class="date">{e(x["date"])}</span><h2>{e(x["titre"])}</h2>'
+                      f'<p>{e(x["texte"])}</p>{f"<p class=src>Sources : {src}</p>" if src else ""}</li>')
+    corps = f"""  <div class="crumbs"><a href="/leman/">Léman Vivant</a> › Histoire</div>
+  <header class="intro">
+    <div class="eyebrow">Léman Vivant</div>
+    <h1>Histoire du Léman</h1>
+    <p>{e(d["intro"])}</p>
+  </header>
+  <p class="relecture">{e(d["relecture"]).replace("Écrivez-nous", '<a href="/#contact">Écrivez-nous</a>')}</p>
+  <ol class="frise">{"".join(etapes)}</ol>"""
+    desc = "Glaciers, Pierres du Niton, palafittes, tsunami de 563, lac malade des années 1970 : l'histoire du Léman en dix étapes."
+    return page("Histoire du Léman · Léman Vivant", desc, "/leman/histoire/", corps, CSS_HISTOIRE, actif="histoire")
+
+
 def semaine(res, cal):
     """Encart « Cette semaine au Léman » de la page d'accueil."""
     tuiles = []
@@ -367,12 +403,16 @@ def construire(res, especes, template):
             os.rmdir(os.path.join(racine, d))
     open(os.path.join(racine, "index.html"), "w").write(page_liste(fiches, obs))
 
+    # histoire du Léman
+    os.makedirs(os.path.join(DOCS, "leman", "histoire"), exist_ok=True)
+    open(os.path.join(DOCS, "leman", "histoire", "index.html"), "w").write(page_histoire())
+
     # accueil
     acc = open(ACCUEIL).read().replace("<!--SEMAINE-->", semaine(res, cal)).replace("<!--POLICES-->", polices())
     open(os.path.join(DOCS, "index.html"), "w").write(acc)
 
     # plan du site
-    urls = [("/", "weekly"), ("/leman/", "daily"), ("/leman/especes/", "weekly")] + [(c, "monthly") for c in sorted(chemins)]
+    urls = [("/", "weekly"), ("/leman/", "daily"), ("/leman/especes/", "weekly"), ("/leman/histoire/", "monthly")] + [(c, "monthly") for c in sorted(chemins)]
     open(os.path.join(DOCS, "sitemap.xml"), "w").write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + "".join(f"  <url><loc>{SITE}{u}</loc><changefreq>{c}</changefreq></url>\n" for u, c in urls) + "</urlset>\n")
