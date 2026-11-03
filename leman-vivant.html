@@ -541,7 +541,7 @@ const PHOTO_BASE = "https://www.lemondedesvivants.org/especes/";
 const NAMES = {"Gobio gobio":"Goujon","Phoxinus phoxinus":"Vairon","Tinca tinca":"Tanche","Scardinius erythrophthalmus":"Rotengle","Esox lucius":"Brochet","Rutilus rutilus":"Gardon","Lota lota":"Lotte","Lepomis gibbosus":"Perche-soleil","Ameiurus melas":"Poisson-chat","Cyprinus carpio":"Carpe commune","Anguilla anguilla":"Anguille européenne","Oncorhynchus mykiss":"Truite arc-en-ciel","Salmo trutta":"Truite (lacustre et de rivière)","Coregonus lavaretus":"Féra (corégone)","Coregonus palaea":"Palée (corégone)","Arenaria interpres":"Tournepierre à collier","Alectoris graeca":"Perdrix bartavelle","Alburnoides bipunctatus":"Spirlin","Clangula hyemalis":"Harelde boréale","Emys orbicularis":"Cistude d'Europe","Lycaena dispar":"Cuivré des marais","Astacus astacus":"Écrevisse à pattes rouges","Perca fluviatilis":"Perche","Salvelinus umbla":"Omble chevalier","Cottus gobio":"Chabot","Formica polyctena":"Fourmi des bois","Gomphus pulchellus":"Gomphe joli"};
 const EXCLUDE = new Set(["Anser cygnoides","Branta ruficollis","Oryctolagus cuniculus"]); // oiseaux échappés de captivité, lapin introduit
 const nm = s => SPECIES[s.sci]?.nom || NAMES[s.sci] || s.fr || s.sci;
-const IUCN = {CR:"En danger critique",EN:"En danger",VU:"Vulnérable",NT:"Quasi menacée",LC:"Préoccupation mineure"};
+const IUCN = {EX:"Éteinte",EW:"Éteinte à l'état sauvage",CR:"En danger critique",EN:"En danger",VU:"Vulnérable",NT:"Quasi menacée",LC:"Préoccupation mineure",DD:"Données insuffisantes",NE:"Non évaluée"};
 
 const ZONES = {
   geneve:{name:"Genève et la Rade",short:"Genève",seed:[6.20,46.262],side:"Suisse · GE",

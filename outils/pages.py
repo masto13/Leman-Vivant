@@ -13,8 +13,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DOCS = os.path.join(os.path.dirname(HERE), "docs")
 SITE = "https://www.lemondedesvivants.org"
 ACCUEIL = os.path.join(HERE, "accueil.html")
-IUCN = {"CR": "En danger critique", "EN": "En danger", "VU": "Vulnérable", "NT": "Quasi menacée",
-        "LC": "Préoccupation mineure"}
+IUCN = {"EX": "Éteinte", "EW": "Éteinte à l'état sauvage", "CR": "En danger critique", "EN": "En danger",
+        "VU": "Vulnérable", "NT": "Quasi menacée", "LC": "Préoccupation mineure",
+        "DD": "Données insuffisantes", "NE": "Non évaluée"}
 MENACEE = ("CR", "EN", "VU", "NT")
 # ordre des groupes sur la page « Les espèces du Léman »
 GROUPES = ["Poisson", "Oiseau", "Amphibien", "Reptile", "Mammifère", "Chauve-souris",
@@ -224,7 +225,7 @@ def observations(res):
 
 def carte(sci, f, iucn):
     img = f'<img src="/especes/{e(f["img"])}" alt="" loading="lazy">' if f.get("img") else '<span class="noimg"></span>'
-    statut = f'<span><span class="iucn {iucn}">{iucn}</span> {IUCN[iucn]}</span>' if iucn in MENACEE else f'<span class="sci">{e(sci)}</span>'
+    statut = f'<span><span class="iucn {iucn}">{iucn}</span> {IUCN.get(iucn, "Non évaluée")}</span>' if iucn in MENACEE else f'<span class="sci">{e(sci)}</span>'
     return f'<a class="card" href="/leman/especes/{slug(sci)}/">{img}<div><b>{e(f["nom"])}</b>{statut}</div></a>'
 
 
@@ -234,7 +235,7 @@ def page_espece(sci, f, o, zones, voisines):
     chemin = f"/leman/especes/{slug(sci)}/"
     groupe = f.get("groupe", "Espèce")
     desc = f"{nom} ({sci}) dans le Léman : comment la reconnaître, où et quand la voir"
-    desc += f", et pourquoi elle est menacée ({IUCN[iucn].lower()})." if menacee else "."
+    desc += f", et pourquoi elle est menacée ({IUCN.get(iucn, "Non évaluée").lower()})." if menacee else "."
     photo = ""
     if f.get("img"):
         credit = f'<a href="{e(f["source"])}" target="_blank" rel="noopener">{e(f.get("auteur"))}</a>' if f.get("source") else e(f.get("auteur"))
@@ -269,7 +270,7 @@ def page_espece(sci, f, o, zones, voisines):
       <header class="sp-head">
         <div class="eyebrow">{e(groupe)} · vu au bord du Léman</div>
         <h1>{e(nom)}</h1>
-        <div class="sp-meta"><span class="sci">{e(sci)}</span><span><span class="iucn {iucn}">{iucn}</span> {IUCN[iucn]}</span>{f'<span>Taille : {e(f["taille"])}</span>' if f.get("taille") else ""}</div>
+        <div class="sp-meta"><span class="sci">{e(sci)}</span><span><span class="iucn {iucn}">{iucn}</span> {IUCN.get(iucn, "Non évaluée")}</span>{f'<span>Taille : {e(f["taille"])}</span>' if f.get("taille") else ""}</div>
       </header>
       {"".join(secs)}
     </div>
