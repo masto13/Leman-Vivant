@@ -164,8 +164,9 @@ ZONES_DIR = os.path.join(os.path.dirname(HERE), "docs", "zones")
 PAS_UNE_PHOTO = re.compile(r"blason|armoiries|wappen|coat.of.arms|map|carte|karte|locator|location|logo|flag|drapeau|\.svg$", re.I)
 
 
-def photo_commons(nom, fichier, largeur=1000):
-    """Télécharge une vignette libre de droits d'un fichier Commons dans docs/zones/ ; renvoie son crédit."""
+def photo_commons(nom, fichier, largeur=1000, dossier=None):
+    """Télécharge une vignette libre de droits d'un fichier Commons (docs/zones/ par défaut) ; renvoie son crédit."""
+    dossier = dossier or ZONES_DIR
     c = wiki("https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo"
              f"&iiprop=url|extmetadata&iiurlwidth={largeur}&titles=File:{urllib.parse.quote(nom)}")
     info = next(iter(c["query"]["pages"].values())).get("imageinfo", [{}])[0]
@@ -174,25 +175,24 @@ def photo_commons(nom, fichier, largeur=1000):
     if not info.get("thumburl") or not re.search(r"CC|domain|GFDL|Public", lic, re.I):
         return None
     ext = ".png" if info["thumburl"].split("?")[0].lower().endswith(".png") else ".jpg"
-    os.makedirs(ZONES_DIR, exist_ok=True)
+    os.makedirs(dossier, exist_ok=True)
     req = urllib.request.Request(info["thumburl"], headers={"User-Agent": WIKI_UA})
-    with urllib.request.urlopen(req, timeout=60) as r, open(os.path.join(ZONES_DIR, fichier + ext), "wb") as f:
+    with urllib.request.urlopen(req, timeout=60) as r, open(os.path.join(dossier, fichier + ext), "wb") as f:
         f.write(r.read())
     return {"img": fichier + ext, "auteur": sans_html(meta.get("Artist", {}).get("value"))[:80] or "Wikimedia Commons",
             "licence": lic, "source": info.get("descriptionurl"), "commons": nom}
 
 
-def photos_zones(tout=False):
-    """Une photo par zone de l'atlas : photo d'un membre si elle existe, sinon Wikimedia Commons."""
-    cfg = json.load(open(ZONES_CFG)) if os.path.exists(ZONES_CFG) else {}
-    cfg.pop("_aide", None)
-    cache = json.load(open(ZONES_PHOTOS)) if os.path.exists(ZONES_PHOTOS) else {}
+def photos_illustrations(cfg, dossier, cache_path, quoi, tout=False):
+    """Une photo par élément de cfg ({id: {wiki, recherche, commons, membre}}) : photo d'un membre si elle existe,
+    sinon Wikimedia Commons. Crédits gardés dans cache_path."""
+    cache = json.load(open(cache_path)) if os.path.exists(cache_path) else {}
     for zid, c in cfg.items():
         if c.get("membre"):  # photo d'un membre : rien à télécharger
             cache[zid] = {**c["membre"], "img": c["membre"]["fichier"], "membre": True}
             continue
         old = cache.get(zid, {})
-        deja = old.get("img") and os.path.exists(os.path.join(ZONES_DIR, old["img"])) and not old.get("membre")
+        deja = old.get("img") and os.path.exists(os.path.join(dossier, old["img"])) and not old.get("membre")
         choix = c.get("commons") or c.get("recherche") or "|".join(c.get("wiki", []))
         if deja and not tout and old.get("choix") == choix:
             continue
@@ -210,17 +210,37 @@ def photos_zones(tout=False):
                 if nom and not PAS_UNE_PHOTO.search(nom):
                     noms.append(nom)
             for nom in noms:
-                r = photo_commons(nom, zid)
+                r = photo_commons(nom, zid, dossier=dossier)
                 if r:
                     cache[zid] = {**r, "choix": choix}
-                    print("photo de zone", zid, ":", nom, flush=True)
+                    print("photo", quoi, zid, ":", nom, flush=True)
                     break
             else:
-                print("photo de zone", zid, ": aucune photo libre trouvée", flush=True)
+                print("photo", quoi, zid, ": aucune photo libre trouvée", flush=True)
         except Exception as e:
-            print("photo de zone", zid, "erreur :", e, flush=True)
-    alleger(ZONES_DIR)
-    json.dump(cache, open(ZONES_PHOTOS, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+            print("photo", quoi, zid, "erreur :", e, flush=True)
+    if os.path.isdir(dossier):
+        alleger(dossier)
+    json.dump(cache, open(cache_path, "w"), ensure_ascii=False, indent=1, sort_keys=True)
+
+
+def photos_zones(tout=False):
+    """Une photo par zone de l'atlas (outils/zones.json)."""
+    cfg = json.load(open(ZONES_CFG)) if os.path.exists(ZONES_CFG) else {}
+    cfg.pop("_aide", None)
+    photos_illustrations(cfg, ZONES_DIR, ZONES_PHOTOS, "de zone", tout)
+
+
+HISTOIRE = os.path.join(HERE, "histoire.json")
+HISTOIRE_PHOTOS = os.path.join(HERE, "data", "histoire-photos.json")
+HISTOIRE_DIR = os.path.join(os.path.dirname(HERE), "docs", "histoire")
+
+
+def photos_histoire(tout=False):
+    """Photos des étapes de l'histoire du Léman qui ont un champ « photo » (outils/histoire.json)."""
+    d = json.load(open(HISTOIRE)) if os.path.exists(HISTOIRE) else {"etapes": []}
+    cfg = {slug(x["titre"]): x["photo"] for x in d["etapes"] if x.get("photo")}
+    photos_illustrations(cfg, HISTOIRE_DIR, HISTOIRE_PHOTOS, "d'histoire", tout)
 
 
 def alleger(dossier, largeur=960, max_ko=180):
@@ -502,6 +522,10 @@ def main():
         photos_zones()
     except Exception as e:
         problems.append(f"photos des zones : {e}")
+    try:
+        photos_histoire()
+    except Exception as e:
+        problems.append(f"photos de l'histoire : {e}")
 
     build(res)
     if problems:
@@ -512,6 +536,7 @@ if __name__ == "__main__":
     if "--photos" in sys.argv:  # cherche les photos manquantes, puis reconstruit
         photos(json.load(open(DATA)), tout=True)
         photos_zones()
+        photos_histoire()
         build(json.load(open(DATA)))
     elif "--build" in sys.argv:
         build(json.load(open(DATA)))

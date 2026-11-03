@@ -322,17 +322,28 @@ CSS_HISTOIRE = """
 .etape p{color:var(--ink);max-width:62ch}
 .etape .src{font-size:13px;color:var(--muted)}
 .etape .src a{color:var(--muted)}
+.etape figure{margin:4px 0 2px;max-width:620px}
+.etape figure img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:14px;background:var(--water)}
+.etape figcaption{font-size:12px;color:var(--muted);padding-top:6px}
+.etape figcaption a{color:var(--muted)}
 """
 
 
 def page_histoire():
     """Frise « Histoire du Léman », écrite dans outils/histoire.json."""
     d = json.load(open(os.path.join(HERE, "histoire.json")))
+    fp = os.path.join(HERE, "data", "histoire-photos.json")
+    photos = json.load(open(fp)) if os.path.exists(fp) else {}
     etapes = []
     for x in d["etapes"]:
         src = " · ".join(f'<a href="{e(u)}" target="_blank" rel="noopener">{e(n)}</a>' for n, u in x.get("sources", []))
+        ph, fig = photos.get(slug(x["titre"])), ""
+        if ph and ph.get("img") and os.path.exists(os.path.join(DOCS, "histoire", ph["img"])):
+            qui = f'<a href="{e(ph["source"])}" target="_blank" rel="noopener">{e(ph.get("auteur"))}</a>' if ph.get("source") else e(ph.get("auteur"))
+            fig = (f'<figure><img src="/histoire/{e(ph["img"])}" alt="{e(x["titre"])}" loading="lazy">'
+                   f'<figcaption>Photo : {qui}{" (membre)" if ph.get("membre") else ""}{" · " + e(ph["licence"]) if ph.get("licence") else ""}</figcaption></figure>')
         etapes.append(f'<li class="etape"><span class="date">{e(x["date"])}</span><h2>{e(x["titre"])}</h2>'
-                      f'<p>{e(x["texte"])}</p>{f"<p class=src>Sources : {src}</p>" if src else ""}</li>')
+                      f'{fig}<p>{e(x["texte"])}</p>{f"<p class=src>Sources : {src}</p>" if src else ""}</li>')
     corps = f"""  <div class="crumbs"><a href="/leman/">Léman Vivant</a> › Histoire</div>
   <header class="intro">
     <div class="eyebrow">Léman Vivant</div>
