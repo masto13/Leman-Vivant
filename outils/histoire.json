@@ -1,5 +1,5 @@
 {
- "_aide": "Textes de la page « Histoire du Léman » (/leman/histoire/). Chaque étape : date, titre, texte (paragraphe), sources (liste de [nom, lien]). Ajoutez, retirez ou réordonnez les étapes librement, puis : python3 outils/actualiser.py --build Facultatif, « photo » : {\"wiki\": [articles Wikipédia]}, {\"recherche\": \"mots-clés Commons\"}, {\"commons\": \"nom de fichier\"} ou {\"membre\": {\"fichier\": \"x.jpg\", \"auteur\": \"Nom\", \"licence\": \"avec son accord\"}} (fichier déposé dans docs/histoire/).",
+ "_aide": "Textes de la page « Histoire du Léman » (/leman/histoire/). Chaque étape : date, titre, texte (paragraphe), sources (liste de [nom, lien]). Ajoutez, retirez ou réordonnez les étapes librement, puis : python3 outils/actualiser.py --build Facultatif, « photo » : {\"wiki\": [articles Wikipédia]}, {\"recherche\": \"mots-clés Commons\"}, {\"commons\": \"nom de fichier\"} ou {\"membre\": {\"fichier\": \"x.jpg\", \"auteur\": \"Nom\", \"licence\": \"avec son accord\"}} (fichier déposé dans docs/histoire/). Dans « photo », « legende » : phrase affichée sous la photo.",
  "intro": "Des glaciers aux moules quagga : comment notre lac est né, et ce qu'il a traversé.",
  "relecture": "Cette page est en cours de relecture par des spécialistes. Vous connaissez bien l'un de ces sujets ou vous constatez une erreur ? Écrivez-nous.",
  "etapes": [
@@ -20,7 +20,8 @@
    "photo": {
     "wiki": [
      "Glacier du Rhône"
-    ]
+    ],
+    "legende": "Le glacier du Rhône aujourd'hui, dans le Valais. Il y a 23 000 ans, il recouvrait tout le bassin du Léman."
    }
   },
   {
@@ -62,7 +63,8 @@
     "wiki": [
      "Pierres du Niton"
     ],
-    "recherche": "Pierres du Niton Genève"
+    "recherche": "Pierres du Niton Genève",
+    "legende": "Les Pierres du Niton dans la rade de Genève."
    }
   },
   {
@@ -102,7 +104,8 @@
     "recherche": "Morges palafittes stations lacustres",
     "wiki": [
      "Sites palafittiques préhistoriques autour des Alpes"
-    ]
+    ],
+    "legende": "Reconstitution d'une maison sur pilotis au Laténium, le musée d'archéologie de Neuchâtel."
    }
   },
   {
@@ -167,7 +170,8 @@
    "photo": {
     "wiki": [
      "Moule quagga"
-    ]
+    ],
+    "legende": "Coquille de moule quagga."
    }
   }
  ]

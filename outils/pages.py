@@ -160,14 +160,31 @@ def polices():
             f"<style>{css}</style>")
 
 
+MENU_SITE = [("/#lacs", "Nos lacs"), ("/#association", "Notre démarche"), ("/#contact", "Contact")]
+MENU_LEMAN = [("/leman/", "Carte", "atlas"), ("/leman/especes/", "Espèces", "especes"), ("/leman/histoire/", "Histoire", "histoire"),
+              ("/leman/#calendrier", "Calendrier", None), ("/leman/#comprendre", "Comprendre", None)]
+CSS_LAC = """
+/* barre propre au lac : reste visible en haut de l'écran, le menu du site défile avec la page */
+.topnav:has(+ .lakenav){position:static}
+.lakenav{position:sticky;top:0;z-index:10;padding-top:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid color-mix(in srgb,var(--ridge1) 60%,transparent)}
+.lakenav-inner{max-width:1180px;margin:0 auto;padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:4px 10px;overflow-x:auto;scrollbar-width:none}
+.lakenav-inner::-webkit-scrollbar{display:none}
+.lakenav b{font:italic 400 17px/1 var(--display);color:var(--accent);white-space:nowrap;padding:8px 12px 8px 0;position:sticky;left:0;z-index:1;background:var(--bg);box-shadow:8px 0 8px -6px var(--bg)}
+.lakenav a{font:500 13.5px/1 var(--body);color:var(--muted);text-decoration:none;padding:8px 11px;border-radius:999px;white-space:nowrap}
+.lakenav a:hover{color:var(--ink)}
+.lakenav a[aria-current="page"]{color:var(--ink);background:var(--surface);box-shadow:0 1px 0 var(--line)}
+.lakenav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+"""
+
+
 def page(titre, description, chemin, corps, css, image=None, jsonld=None, actif=None):
     """Squelette commun : en-tête pour Google et les aperçus de liens, navigation, pied de page."""
     url = SITE + chemin
     image = image or SITE + "/leman/og.png"
-    nav = [("/leman/", "Léman Vivant", "atlas"), ("/leman/especes/", "Espèces", "especes"), ("/leman/histoire/", "Histoire", "histoire"),
-           ("/#association", "L'association", None), ("/#contact", "Contact", None)]
+    # menu du site, le même partout ; puis la barre du lac (ici le Léman)
+    liens = "".join(f'<a href="{h}">{t}</a>' for h, t in MENU_SITE)
     cur = ' aria-current="page"'
-    liens = "".join(f'<a href="{h}"{cur if k and k == actif else ""}>{t}</a>' for h, t, k in nav)
+    lac = "".join(f'<a href="{h}"{cur if k == actif else ""}>{t}</a>' for h, t, k in MENU_LEMAN)
     ld = f'<script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False)}</script>\n' if jsonld else ""
     return f"""<!doctype html>
 <html lang="fr">
@@ -190,7 +207,7 @@ def page(titre, description, chemin, corps, css, image=None, jsonld=None, actif=
 <link rel="icon" href="/icons/symbole.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
 {ld}{polices()}
-<style>{CSS}{css}</style>
+<style>{CSS}{CSS_LAC}{css}</style>
 </head>
 <body>
 {SYMBOLE}
@@ -200,6 +217,7 @@ def page(titre, description, chemin, corps, css, image=None, jsonld=None, actif=
     <div class="navtabs">{liens}</div>
   </div>
 </nav>
+<nav class="lakenav" aria-label="Léman Vivant"><div class="lakenav-inner"><b>Léman Vivant</b>{lac}</div></nav>
 <main class="inner">
 {corps}
   <footer class="site-foot">
@@ -341,7 +359,7 @@ def page_histoire():
         if ph and ph.get("img") and os.path.exists(os.path.join(DOCS, "histoire", ph["img"])):
             qui = f'<a href="{e(ph["source"])}" target="_blank" rel="noopener">{e(ph.get("auteur"))}</a>' if ph.get("source") else e(ph.get("auteur"))
             fig = (f'<figure><img src="/histoire/{e(ph["img"])}" alt="{e(x["titre"])}" loading="lazy">'
-                   f'<figcaption>Photo : {qui}{" (membre)" if ph.get("membre") else ""}{" · " + e(ph["licence"]) if ph.get("licence") else ""}</figcaption></figure>')
+                   f'<figcaption>{e(x["photo"]["legende"]) + " " if x.get("photo", {}).get("legende") else ""}Photo : {qui}{" (membre)" if ph.get("membre") else ""}{" · " + e(ph["licence"]) if ph.get("licence") else ""}</figcaption></figure>')
         etapes.append(f'<li class="etape"><span class="date">{e(x["date"])}</span><h2>{e(x["titre"])}</h2>'
                       f'{fig}<p>{e(x["texte"])}</p>{f"<p class=src>Sources : {src}</p>" if src else ""}</li>')
     corps = f"""  <div class="crumbs"><a href="/leman/">Léman Vivant</a> › Histoire</div>
