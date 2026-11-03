@@ -778,9 +778,11 @@ function renderTab(){
     const c = z.counts, max = d3.max(Object.values(c));
     const lab = {oiseaux:"Oiseaux",insectes:"Insectes",plantes:"Plantes",amphibiens:"Amphibiens",mollusques:"Mollusques",poissons:"Poissons"};
     el.innerHTML = `<div class="bars">${Object.keys(lab).map(k=>`<div class="bar"><span>${lab[k]}</span><span class="track"><span class="fill" style="display:block;width:${Math.max(1,c[k]/max*100)}%"></span></span><span class="n">${fmtN(c[k])}</span></div>`).join("")}</div>
-      <div><div class="eyebrow" style="margin-bottom:4px">Poissons les plus observés</div>${spList(z.fish,"Pas encore de données.")}</div>
+      ${(z.emblemes||[]).length?`<div id="sp-emb"><div class="eyebrow" style="margin-bottom:4px">Les incontournables du lac</div>${spList(z.emblemes,"")}</div>`:""}
+      <div id="sp-fish"><div class="eyebrow" style="margin-bottom:4px">Poissons les plus observés</div>${spList(z.fish,"Pas encore de données.")}</div>
       <p class="note">Observations GBIF autour de la zone, rives comprises. Plus il y a d'observateurs, plus il y a de données : ce n'est pas une mesure exacte de l'abondance.</p>`;
-    bindSpList(el, z.fish);
+    if (z.emblemes?.length) bindSpList(el.querySelector("#sp-emb"), z.emblemes);
+    bindSpList(el.querySelector("#sp-fish"), z.fish);
   } else if(curTab==="menaces"){
     const th = z.threatened.filter(s=>!EXCLUDE.has(s.sci));
     el.innerHTML = `<p>Espèces observées ici et classées sur la Liste rouge mondiale de l'UICN.</p>${spList(th,"Aucune espèce menacée dans les données.")}
@@ -848,7 +850,7 @@ function renderFiche(){
   const s = ficheList[ficheIdx], f = SPECIES[s.sci] || {}, name = nm(s);
   const menacee = ["CR","EN","VU","NT"].includes(s.iucn);
   const zones = Object.keys(ZONES).map(id => {
-    const o = [...(DATA.zones[id].fish||[]), ...(DATA.zones[id].threatened||[])].find(x => x.sci === s.sci);
+    const o = [...(DATA.zones[id].fish||[]), ...(DATA.zones[id].threatened||[]), ...(DATA.zones[id].emblemes||[])].find(x => x.sci === s.sci);
     return o ? [id, o.n] : null;
   }).filter(Boolean).sort((a,b) => b[1]-a[1]);
   const credit = f.img ? `<figcaption>Photo : ${f.source ? `<a href="${esc(f.source)}" target="_blank" rel="noopener">${esc(f.auteur)}</a>` : esc(f.auteur)}${f.licence ? ` · ${esc(f.licence)}` : ""}</figcaption>` : "";

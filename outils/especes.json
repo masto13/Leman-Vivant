@@ -1,5 +1,5 @@
 {
- "_aide": "Fiches espèces écrites à la main. Clé = nom scientifique (comme dans GBIF). Champs : nom, groupe, taille, reconnaitre (liste), ou (où et quand la voir), menace (pourquoi elle est menacée ou ce qu'il faut savoir), savoir (le saviez-vous), commons (facultatif : nom d'un fichier Wikimedia Commons pour remplacer la photo). Après une modification : python3 outils/actualiser.py --photos",
+ "_aide": "Fiches espèces écrites à la main. Clé = nom scientifique (comme dans GBIF). Champs : nom, groupe, taille, reconnaitre (liste), ou (où et quand la voir), menace (pourquoi elle est menacée ou ce qu'il faut savoir), savoir (le saviez-vous), commons (facultatif : nom d'un fichier Wikimedia Commons pour remplacer la photo). Après une modification : python3 outils/actualiser.py --photos emblematique (true) : espèce emblématique du lac, suivie dans toutes les zones quel que soit son statut de menace.",
 
  "Abramis brama": {"nom": "Brème commune", "groupe": "Poisson", "taille": "30 à 50 cm, parfois 70 cm",
   "reconnaitre": ["Corps très haut et aplati sur les côtés, dos bossu", "Bouche qui s'allonge en tube pour fouiller la vase", "Gris argenté chez les jeunes, bronze chez les adultes ; nageoire anale longue"],
@@ -308,5 +308,69 @@
   "reconnaitre": ["Pupille verticale, en fente", "Museau légèrement retroussé", "Barres sombres sur le dos ; tête couverte de petites écailles"],
   "ou": "Coteaux secs, pierriers et lisières ensoleillées au-dessus du lac.",
   "menace": "Disparition des murs de pierres sèches, des lisières et des friches, et destruction volontaire. Elle est protégée en Suisse.",
-  "savoir": "Elle n'est pas agressive : une morsure est rare et vient presque toujours d'une tentative de la saisir."}
+  "savoir": "Elle n'est pas agressive : une morsure est rare et vient presque toujours d'une tentative de la saisir."},
+
+ "Alcedo atthis": {"nom": "Martin-pêcheur d'Europe", "groupe": "Oiseau", "taille": "16 à 17 cm",
+  "reconnaitre": ["Dos bleu turquoise éclatant, ventre orange", "Long bec en poignard", "Souvent aperçu comme un éclair bleu au ras de l'eau, avec un cri aigu"],
+  "ou": "Toute l'année aux embouchures et le long des rivières calmes, perché sur une branche au-dessus de l'eau.",
+  "menace": "Il creuse son terrier dans des berges de terre meuble, qui disparaissent quand les rives sont aménagées. Les hivers très froids lui sont souvent fatals.",
+  "savoir": "Il plonge tête la première depuis son perchoir, puis assomme le poisson contre une branche avant de l'avaler.",
+  "emblematique": true},
+
+ "Ardea cinerea": {"nom": "Héron cendré", "groupe": "Oiseau", "taille": "90 cm à 1 m, envergure 1,8 m",
+  "reconnaitre": ["Grand échassier gris, long cou et long bec jaune", "Large trait noir au-dessus de l'œil", "Vole le cou replié en S, les pattes tendues derrière lui"],
+  "ou": "Toute l'année au bord de l'eau, immobile à l'affût dans les roselières, aux embouchures et sur les enrochements.",
+  "savoir": "Contrairement aux cigognes, qui volent le cou tendu, il replie le sien : c'est le moyen le plus sûr de les distinguer en vol.",
+  "emblematique": true},
+
+ "Castor fiber": {"nom": "Castor d'Europe", "groupe": "Mammifère", "taille": "80 cm à 1 m, plus 30 cm de queue, jusqu'à 30 kg",
+  "reconnaitre": ["Queue plate, large et écailleuse", "Nage la tête seule hors de l'eau, plonge en claquant la queue", "Indices : troncs rongés en forme de pointe de crayon, copeaux au pied des arbres"],
+  "ou": "Au crépuscule, dans les rivières et les embouchures bordées d'arbres (Versoix, Venoge, Aubonne, delta du Rhône).",
+  "menace": "Protégé en Suisse. Il a besoin de rives naturelles et boisées : les berges bétonnées le privent de nourriture et d'abri.",
+  "savoir": "Disparu de Suisse au début du XIXe siècle, il y a été réintroduit à partir de 1956, d'abord dans la Versoix, près de Genève.",
+  "emblematique": true},
+
+ "Chroicocephalus ridibundus": {"nom": "Mouette rieuse", "groupe": "Oiseau", "taille": "35 à 39 cm",
+  "reconnaitre": ["Bec et pattes rouges", "Été : tête brun chocolat (pas noire)", "Hiver : tête blanche avec une petite tache sombre derrière l'œil"],
+  "ou": "Toute l'année, et en très grand nombre en hiver le long des quais et des ports.",
+  "savoir": "Une partie des mouettes qui passent l'hiver sur le Léman viennent de pays du nord et de l'est de l'Europe : on le sait grâce aux bagues qu'elles portent aux pattes.",
+  "emblematique": true},
+
+ "Cygnus olor": {"nom": "Cygne tuberculé", "groupe": "Oiseau", "taille": "1,25 à 1,60 m, envergure jusqu'à 2,4 m",
+  "reconnaitre": ["Grand oiseau entièrement blanc, cou long souvent tenu en S", "Bec orange avec une bosse noire à la base, plus grosse chez le mâle", "Jeunes gris-brun la première année"],
+  "ou": "Toute l'année le long des quais et dans les ports. Au printemps, gros nid de roseaux au bord de l'eau, défendu avec vigueur.",
+  "menace": "Ne lui donnez pas de pain : pauvre pour lui, il provoque des carences et des déformations des ailes chez les jeunes, et salit l'eau des ports.",
+  "savoir": "En vol, ses ailes produisent un chuintement puissant qu'on entend de loin, bien avant de le voir passer.",
+  "emblematique": true},
+
+ "Fulica atra": {"nom": "Foulque macroule", "groupe": "Oiseau", "taille": "36 à 38 cm",
+  "reconnaitre": ["Oiseau noir et rond", "Bec blanc prolongé par une plaque blanche sur le front", "Pieds gris aux doigts bordés de lobes, pas palmés"],
+  "ou": "Toute l'année près des rives et dans les ports. En hiver, grands groupes de plusieurs centaines d'oiseaux.",
+  "savoir": "Ses doigts lobés lui servent de palmes dans l'eau et de raquettes sur la vase.",
+  "emblematique": true},
+
+ "Mergus merganser": {"nom": "Harle bièvre", "groupe": "Oiseau", "taille": "58 à 66 cm",
+  "reconnaitre": ["Mâle : corps blanc teinté de saumon, tête vert sombre", "Femelle : corps gris, tête rousse avec une huppe en arrière", "Bec rouge, fin et dentelé pour tenir les poissons"],
+  "ou": "Toute l'année le long des rives et aux embouchures. Il plonge pour chasser les petits poissons.",
+  "savoir": "Il niche dans des cavités d'arbres, parfois haut perchées : au lendemain de l'éclosion, les poussins sautent dans le vide pour rejoindre l'eau.",
+  "emblematique": true},
+
+ "Milvus migrans": {"nom": "Milan noir", "groupe": "Oiseau", "taille": "48 à 58 cm, envergure 1,5 m",
+  "reconnaitre": ["Rapace brun sombre", "Queue légèrement échancrée, presque droite", "Plane longuement au-dessus de l'eau et des rives"],
+  "ou": "De mars à août au-dessus du lac. Il ramasse en vol les poissons morts à la surface.",
+  "savoir": "Il passe l'hiver en Afrique, au sud du Sahara, et revient chaque printemps parmi les premiers migrateurs.",
+  "emblematique": true},
+
+ "Phalacrocorax carbo": {"nom": "Grand cormoran", "groupe": "Oiseau", "taille": "80 cm à 1 m, envergure jusqu'à 1,5 m",
+  "reconnaitre": ["Grand oiseau noir à reflets, bec crochu", "Joues et gorge blanches", "Se pose sur les bouées et les pontons, ailes déployées"],
+  "ou": "Toute l'année, surtout en hiver, sur les bouées, les digues et les arbres des rives.",
+  "menace": "Il mange beaucoup de poissons, ce qui crée des tensions avec les pêcheurs.",
+  "savoir": "Son plumage n'est pas totalement imperméable : il reste ailes ouvertes au soleil pour le faire sécher.",
+  "emblematique": true},
+
+ "Podiceps cristatus": {"nom": "Grèbe huppé", "groupe": "Oiseau", "taille": "46 à 51 cm",
+  "reconnaitre": ["Long cou blanc et bec fin et pointu", "Au printemps : huppe noire et collerette rousse autour de la tête", "Plonge très souvent et réapparaît plus loin"],
+  "ou": "Toute l'année sur l'ensemble du lac. Nids flottants dans les roselières d'avril à juillet : ne vous en approchez pas.",
+  "savoir": "Au printemps, les couples se font face, secouent la tête et s'offrent des herbes aquatiques. Les poussins voyagent sur le dos de leurs parents.",
+  "emblematique": true}
 }

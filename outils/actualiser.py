@@ -65,7 +65,19 @@ def sp(key):
     return species[key]
 
 
-def faune(box):
+def cles_emblemes():
+    """Clés GBIF des espèces emblématiques (cochées « emblematique » dans especes.json)."""
+    fiches = json.load(open(FICHES)) if os.path.exists(FICHES) else {}
+    cles = []
+    for sci, f in fiches.items():
+        if isinstance(f, dict) and f.get("emblematique"):
+            m = get("https://api.gbif.org/v1/species/match?strict=true&name=" + urllib.parse.quote(sci))
+            if m.get("usageKey"):
+                cles.append(m.get("speciesKey") or m["usageKey"])
+    return cles
+
+
+def faune(box, emblemes=()):
     a, b, c, d = box
     base = f"https://api.gbif.org/v1/occurrence/search?decimalLatitude={a},{b}&decimalLongitude={c},{d}&limit=0"
     out = {"total": get(base)["count"], "counts": {g: get(base + "&" + q)["count"] for g, q in GROUPS.items()}}
@@ -76,6 +88,9 @@ def faune(box):
     out["threatened"] = [{**sp(f["name"]), "n": f["count"]}
                          for f in (th["facets"][0]["counts"] if th["facets"] else [])
                          if sp(f["name"])["iucn"] in ("CR", "EN", "VU", "NT")]
+    if emblemes:  # espèces emblématiques du lac (cygne, castor, grèbe…), quel que soit leur statut
+        em = get(base + "".join(f"&taxonKey={k}" for k in emblemes) + f"&facet=speciesKey&facetLimit={len(emblemes)}")
+        out["emblemes"] = [{**sp(f["name"]), "n": f["count"]} for f in (em["facets"][0]["counts"] if em["facets"] else [])]
     return out
 
 
@@ -228,7 +243,7 @@ def photos(res, tout=False):
     """Complète outils/data/photos.json pour les espèces affichées qui n'ont pas encore de photo."""
     cache = json.load(open(PHOTOS)) if os.path.exists(PHOTOS) else {}
     fiches = json.load(open(FICHES)) if os.path.exists(FICHES) else {}
-    noms = {s["sci"] for z in res["zones"].values() for k in ("fish", "threatened") for s in (z.get(k) or [])}
+    noms = {s["sci"] for z in res["zones"].values() for k in ("fish", "threatened", "emblemes") for s in (z.get(k) or [])}
     for sci in sorted(noms):
         choix = fiches.get(sci, {}).get("commons")
         deja = sci in cache and (not choix or cache[sci].get("commons") == choix)
@@ -439,14 +454,19 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
     res = {"fetched": now.strftime("%Y-%m-%d %H:%M UTC"), "zones": {}}
     problems = []
+    try:
+        emblemes = cles_emblemes()
+    except Exception as e:
+        problems.append(f"espèces emblématiques : {e}")
+        emblemes = []
     for zid, box, (lat, lon) in ZONES:
         prev = old["zones"].get(zid, {})
         z = {}
         try:
-            z.update(faune(box))
+            z.update(faune(box, emblemes))
         except Exception as e:
             problems.append(f"{zid} faune : {e}")
-            z.update({k: prev.get(k) for k in ("total", "counts", "fish", "threatened")})
+            z.update({k: prev.get(k) for k in ("total", "counts", "fish", "threatened", "emblemes")})
         try:
             z["temp"] = temperature(lat, lon, now)
         except Exception as e:

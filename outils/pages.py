@@ -216,7 +216,7 @@ def observations(res):
     """Pour chaque espèce : statut UICN, nom GBIF et nombre d'observations par zone."""
     obs = {}
     for zid, z in res["zones"].items():
-        for o in (z.get("fish") or []) + (z.get("threatened") or []):
+        for o in (z.get("fish") or []) + (z.get("threatened") or []) + (z.get("emblemes") or []):
             d = obs.setdefault(o["sci"], {"iucn": o.get("iucn"), "fr": o.get("fr"), "zones": {}})
             d["zones"][zid] = max(d["zones"].get(zid, 0), o.get("n", 0))
     return obs
