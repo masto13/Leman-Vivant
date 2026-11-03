@@ -23,6 +23,14 @@
   "source": "https://commons.wikimedia.org/wiki/File:AlburnusAlburnus1.JPG",
   "wiki": "https://fr.wikipedia.org/wiki/Alburnus_alburnus"
  },
+ "Alcedo atthis": {
+  "auteur": "Andreas Trepte",
+  "img": "alcedo-atthis.jpg",
+  "licence": "CC BY-SA 2.5",
+  "resume": "Le Martin-pêcheur d'Europe (Alcedo atthis)  est une espèce d'oiseaux, espèce type de la famille des Alcedinidae. Cet oiseau est un très bon bioindicateur de la qualité d'un milieu aquatique.",
+  "source": "https://commons.wikimedia.org/wiki/File:Common_Kingfisher_Alcedo_atthis.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Martin-p%C3%AAcheur_d%27Europe"
+ },
  "Alectoris graeca": {
   "auteur": "FokusNatur",
   "img": "alectoris-graeca.jpg",
@@ -54,6 +62,14 @@
   "resume": "L'Oie cygnoïde (Anser cygnoides) est une espèce d'oies de la famille des Anatidae. Cette espèce vit en Extrême-Orient. Elle est assez peu connue et actuellement menacée.",
   "source": "https://commons.wikimedia.org/wiki/File:Anser_cygnoides,_Ozero_Stepnoye,_Ivolginskiy,_Buryatia_Republic,_Russia_1_(cropped).jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Oie_cygno%C3%AFde"
+ },
+ "Ardea cinerea": {
+  "auteur": "Laitche",
+  "img": "ardea-cinerea.jpg",
+  "licence": "CC BY-SA 3.0",
+  "resume": "Le Héron cendré (Ardea cinerea) est une espèce d'oiseaux échassiers de la famille des Ardeidae.\nC'est le plus commun des hérons d'Europe, on en trouve toute l'année dans les régions tempérées d'Europe et de l'Asie ainsi que dans le sud de l'Afrique. Dans les régions les plus au nord, ils migrent vers le sud en automne.",
+  "source": "https://commons.wikimedia.org/wiki/File:Ardea_cinerea_2013-09-16_2.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/H%C3%A9ron_cendr%C3%A9"
  },
  "Arenaria interpres": {
   "auteur": "Hans Hillewaert",
@@ -111,6 +127,22 @@
   "source": "https://commons.wikimedia.org/wiki/File:Calidris_alpina_alpina,_Riga,_Latvia_1.jpg",
   "wiki": "https://fr.wikipedia.org/wiki/B%C3%A9casseau_variable"
  },
+ "Castor fiber": {
+  "auteur": "Per Harald Olsen",
+  "img": "castor-fiber.jpg",
+  "licence": "CC BY-SA 3.0",
+  "resume": "Le Castor d'Europe, Castor d'Eurasie ou Castor commun (Castor fiber), autrefois appelé bièvre, est une espèce de mammifères aquatiques de la famille des Castoridés. C'est le plus grand rongeur autochtone d'Eurasie et de l'hémisphère nord. Son apparence est très semblable à celle du Castor du Canada (C. canadensis).",
+  "source": "https://commons.wikimedia.org/wiki/File:Beaver_pho34.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Castor_fiber"
+ },
+ "Chroicocephalus ridibundus": {
+  "auteur": "Richard Crossley",
+  "img": "chroicocephalus-ridibundus.jpg",
+  "licence": "CC BY-SA 3.0",
+  "resume": "La Mouette rieuse (Chroicocephalus ridibundus, anciennement Larus ridibundus) est une espèce d'oiseaux Charadriiformes de la famille des Laridae. Selon la classification de référence du Congrès ornithologique international  (version 15.2, 2026), c'est une espèce monotypique (non subdivisée en sous-espèces).",
+  "source": "https://commons.wikimedia.org/wiki/File:Black-headed_Gull_from_the_Crossley_ID_Guide_Britain_and_Ireland.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Mouette_rieuse"
+ },
  "Clangula hyemalis": {
   "auteur": "Wolfgang Wander",
   "img": "clangula-hyemalis.jpg",
@@ -159,6 +191,14 @@
   "resume": "Cottus gobio, le Chabot commun, Chabot périalpin, Chabot de rivière ou Chabot, est une espèce de poissons de la famille des Cottidae. L'espèce était subdivisée en plusieurs sous-espèces, considérées non valides actuellement.",
   "source": "https://commons.wikimedia.org/wiki/File:Cottus_gobio.jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Cottus_gobio"
+ },
+ "Cygnus olor": {
+  "auteur": "Sanchezn",
+  "img": "cygnus-olor.jpg",
+  "licence": "CC BY-SA 3.0",
+  "resume": "Le Cygne tuberculé ou Cygne muet (Cygnus olor) est une espèce d'oiseaux de la famille des Anatidae. Le premier nom de l'animal provient de la bosse qu'il a sur le bec, appelée tubercule, et le second du fait qu'il émet de rares cris plutôt de faible puissance.\nC'est l'un des plus lourds oiseaux capables de voler, les mâles pesant en moyenne environ 10,2 kg (parfois jusqu'à 13 kg) et les femelles environ 8,4 kg.",
+  "source": "https://commons.wikimedia.org/wiki/File:CygneVaires.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Cygne_tubercul%C3%A9"
  },
  "Cyprinus carpio": {
   "auteur": "USFWS",
@@ -214,6 +254,14 @@
   "resume": "Formica rufa est une espèce de fourmis du genre Formica et du sous-genre Formica (Formica), connu en français sous le nom de « fourmi rousse des bois ». Cette espèce se trouve couramment dans une grande partie de l'Europe — en particulier dans les forêts de conifères et de feuillus ainsi que dans les parcs.\nL’acide formique dont elle se sert pour se défendre et chasser a été extrait en 1671 par le naturaliste anglais John Ray en distillant un grand nombre de fourmis écrasées de cette espèce.",
   "source": "https://commons.wikimedia.org/wiki/File:Formica_rufa_a1.jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Formica_rufa"
+ },
+ "Fulica atra": {
+  "auteur": "Alexis Lours",
+  "img": "fulica-atra.jpg",
+  "licence": "CC BY 4.0",
+  "resume": "La Foulque macroule (Fulica atra) est une espèce d'oiseaux de la famille des Rallidae. Originaire d'une vaste partie de l'Ancien Monde et de l'Océanie, elle est la principale espèce de foulques naturellement présente en Europe.\nC'est une espèce grégaire sur les étendues d'eau en hiver.",
+  "source": "https://commons.wikimedia.org/wiki/File:Eurasian_Coot_2026_03_23_01.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Foulque_macroule"
  },
  "Gobio gobio": {
   "auteur": "Viridiflavus at Dutch Wikipedia (Original text: Piet Spaans)",
@@ -288,6 +336,22 @@
   "source": "https://commons.wikimedia.org/wiki/File:Melanitta_fusca,_Grindavik,_Iceland_2.jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Macreuse_brune"
  },
+ "Mergus merganser": {
+  "auteur": "ALAN SCHMIERER",
+  "img": "mergus-merganser.jpg",
+  "licence": "CC0",
+  "resume": "Le Harle bièvre (Mergus merganser) est une espèce de canards piscivores de la famille des Anatidae. Il était aussi connu sous le nom de « Grand bec-scie » en Amérique du Nord francophone, et a reçu le nom normalisé de « Grand Harle ».",
+  "source": "https://commons.wikimedia.org/wiki/File:MERGANSER,_COMMON_(10-28-07)_san_sim_-03_(1626164148).jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Harle_bi%C3%A8vre"
+ },
+ "Milvus migrans": {
+  "auteur": "Thomas Kraft (ThKraft)",
+  "img": "milvus-migrans.jpg",
+  "licence": "CC BY-SA 2.5",
+  "resume": "Le Milan noir (Milvus migrans) est une espèce répandue de rapaces appartenant à la famille des Accipitridae.",
+  "source": "https://commons.wikimedia.org/wiki/File:Milvus_migrans_front(ThKraft).jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Milan_noir"
+ },
  "Numenius arquata": {
   "auteur": "Ken Billington",
   "img": "numenius-arquata.jpg",
@@ -320,6 +384,14 @@
   "source": "https://commons.wikimedia.org/wiki/File:Egli_(Perca_fluviatilis).jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Perca_fluviatilis"
  },
+ "Phalacrocorax carbo": {
+  "auteur": "JJ Harrison (https://www.jjharrison.com.au/)",
+  "img": "phalacrocorax-carbo.jpg",
+  "licence": "CC BY-SA 3.0",
+  "resume": "Le Grand Cormoran (Phalacrocorax carbo) ou Cormoran commun est une espèce d'oiseaux aquatiques piscivores de la famille des Phalacrocoracidés. Son aire de distribution est très vaste (Europe, Asie, Océanie, Afrique et une frange orientale de l'Amérique du Nord). On distingue habituellement cinq à huit sous-espèces.",
+  "source": "https://commons.wikimedia.org/wiki/File:Phalacrocorax_carbo_Vic.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Grand_Cormoran"
+ },
  "Phoxinus phoxinus": {
   "auteur": "Adrien Pinot",
   "img": "phoxinus-phoxinus.jpg",
@@ -351,6 +423,14 @@
   "resume": "Le Grèbe esclavon (Podiceps auritus), aussi appelé Grèbe cornu ou Grèbe oreillard, est une espèce d'oiseaux de la famille des Podicipedidae. En plumage internuptial, il est souvent confondu avec le Grèbe à cou noir (Podiceps nigricollis). Cet oiseau est protégé en Europe.",
   "source": "https://commons.wikimedia.org/wiki/File:Podiceps_auritus_(13909575538)_(cropped).jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Gr%C3%A8be_esclavon"
+ },
+ "Podiceps cristatus": {
+  "auteur": "Alexis Lours",
+  "img": "podiceps-cristatus.jpg",
+  "licence": "CC BY 4.0",
+  "resume": "Le Grèbe huppé (Podiceps cristatus) est une espèce d'oiseaux de la famille des Podicipedidae. C'est le plus grand des grèbes présents en Europe. Sa parade nuptiale est connue pour sa complexité.",
+  "source": "https://commons.wikimedia.org/wiki/File:Great_crested_grebe_2025_10_16_05.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Gr%C3%A8be_hupp%C3%A9"
  },
  "Rissa tridactyla": {
   "auteur": "Hanno",
