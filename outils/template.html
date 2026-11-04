@@ -105,6 +105,16 @@ svg.map{display:block;width:100%;height:auto}
 .country{font:italic 400 13px var(--display);letter-spacing:.3em;fill:var(--muted);opacity:.6}
 .beach{fill:var(--sand);stroke:var(--surface);stroke-width:1.5;cursor:pointer}
 .reserve{fill:var(--reed);fill-opacity:.18;stroke:var(--reed);stroke-width:1.2;stroke-dasharray:2 2;cursor:pointer}
+/* curseur de profondeur : la carte se recolore quand on « descend » dans le lac */
+.plonge{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:center;padding:2px 14px 10px}
+.plonge[hidden]{display:none}
+.plonge label{font:italic 400 17px var(--display);color:var(--ink)}
+.plonge-ctl{display:grid;gap:2px;max-width:360px}
+.plonge input{width:100%;margin:6px 0 0;accent-color:var(--accent);cursor:pointer}
+.plonge-ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.plonge-note{grid-column:1 / -1;font:italic 15px/1.35 var(--display);color:var(--muted);margin-top:4px;min-height:1.35em}
+.zone.nodata{fill-opacity:.35}
+@media (max-width:520px){.plonge-note{min-height:calc(1.35em * 3)}} /* place réservée : la carte ne saute pas pendant qu'on glisse */
 .legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:12px 14px;font-size:12.5px;color:var(--muted)}
 .ramp{width:130px;height:6px;border-radius:999px}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:7px 10px;border-radius:10px;max-width:230px;transform:translate(-50%,-115%);white-space:normal}
@@ -383,6 +393,14 @@ dialog.fiche::backdrop{background:rgba(12,28,26,.55);backdrop-filter:blur(3px)}
           <button class="chip" data-overlay="beaches" aria-pressed="true"><i></i>Baignade</button>
           <button class="chip" data-overlay="reserves" aria-pressed="true"><i></i>Zones sensibles</button>
           <button class="chip locate" id="locate" type="button" hidden><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>Où suis-je ?</button>
+        </div>
+        <div class="plonge" id="depth">
+          <label for="depth-range">Plongez</label>
+          <div class="plonge-ctl">
+            <input type="range" id="depth-range" min="0" max="2" step="1" value="0" aria-valuetext="en surface, à 1 mètre">
+            <div class="plonge-ticks" aria-hidden="true"><span>Surface</span><span>10 m</span><span>30 m</span></div>
+          </div>
+          <p class="plonge-note" id="depth-note" aria-live="polite"></p>
         </div>
         <div class="whereami" id="whereami" hidden aria-live="polite"></div>
         <div class="mapbox" id="mapbox">
@@ -686,30 +704,59 @@ function tip(e,html){const r=box.getBoundingClientRect();tipEl.innerHTML=html;ti
 function hideTip(){tipEl.hidden=true}
 
 /* ---------- layers ---------- */
-let layer = "temp";
+let layer = "temp", depth = 0;
+const DEPTHS = ["1", "10", "30"], DLAB = ["en surface", "à 10 m", "à 30 m"];
 const surf = id => DATA.zones[id].temp["1"]?.last;
+const tAt = id => DATA.zones[id].temp[DEPTHS[depth]]?.last;
 const fmtT = v => v==null ? "—" : v.toFixed(1).replace(".",",")+" °C";
 const tempTxt = id => fmtT(surf(id));
-const temps = ids.map(surf).filter(v=>v!=null);
-const tScale = d3.scaleSequential(d3.interpolateRgbBasis(["#7aa7c4","#9fcbc8","#cfdcb4","#e4c48f"])).domain([Math.floor(d3.min(temps)*2)/2-0.5, Math.ceil(d3.max(temps)*2)/2+0.5]);
+// une seule échelle pour toutes les profondeurs : on voit l'eau se refroidir en descendant
+const temps = ids.flatMap(id => DEPTHS.map(d => DATA.zones[id].temp[d]?.last)).filter(v=>v!=null);
+const tScale = d3.scaleSequential(d3.interpolateRgbBasis(["#3f6f9c","#7aa7c4","#9fcbc8","#cfdcb4","#e4c48f"])).domain([Math.floor(d3.min(temps)*2)/2-0.5, Math.ceil(d3.max(temps)*2)/2+0.5]);
 const totals = ids.map(id=>DATA.zones[id].total);
 const bScale = d3.scaleSequentialLog(d3.interpolateRgbBasis(["#e2ecd9","#b7d0a3","#86ad78","#5a8a5e"])).domain([d3.min(totals),d3.max(totals)]);
 const NF = new Intl.NumberFormat("fr-CH"), fmtN = n => NF.format(n); // un seul formateur, réutilisé
-function layerTip(id){return layer==="temp" ? `${tempTxt(id)} à 1 m de profondeur` : `${fmtN(DATA.zones[id].total)} observations naturalistes`}
+function layerTip(id){
+  if (layer !== "temp") return `${fmtN(DATA.zones[id].total)} observations naturalistes`;
+  const v = tAt(id);
+  return v == null ? `Trop peu profond ici pour une valeur ${DLAB[depth]}` : `${fmtT(v)} ${depth ? DLAB[depth] : "en surface (1 m)"}`;
+}
+// phrase sous le curseur : écart moyen avec la surface, là où les deux valeurs existent
+function depthNote(){
+  const el = document.getElementById("depth-note");
+  if (!depth) { el.textContent = "Faites glisser pour descendre dans le lac."; return; }
+  const d = ids.map(id => [surf(id), tAt(id)]).filter(([a,b]) => a!=null && b!=null).map(([a,b]) => a-b);
+  const manque = ids.filter(id => tAt(id) == null).length;
+  const ecart = d.length ? d3.mean(d) : null;
+  el.textContent = (ecart == null ? "" : ecart < 0.3 ? `${DLAB[depth][0].toUpperCase() + DLAB[depth].slice(1)}, l'eau a presque la même température qu'en surface : elle est encore bien mélangée.`
+    : `${DLAB[depth][0].toUpperCase() + DLAB[depth].slice(1)}, l'eau est en moyenne ${ecart.toFixed(1).replace(".", ",")} °C plus froide qu'en surface.`)
+    + (manque ? ` Les zones pâles sont trop peu profondes pour une mesure ${DLAB[depth]}.` : "");
+}
 function paint(){
-  ids.forEach(id=>zoneEls[id].attr("fill", layer==="temp" ? tScale(surf(id)) : bScale(DATA.zones[id].total)));
+  ids.forEach(id=>{
+    const v = layer==="temp" ? tAt(id) : DATA.zones[id].total;
+    zoneEls[id].classed("nodata", v == null).transition().duration(450)
+      .attr("fill", v == null ? "#c9d3cf" : layer==="temp" ? tScale(v) : bScale(v));
+  });
+  document.getElementById("depth").hidden = layer !== "temp";
+  if (layer === "temp") depthNote();
   const lg = document.getElementById("legend");
   const dom = layer==="temp"?tScale.domain():bScale.domain();
   const sc = layer==="temp"?tScale:bScale;
   const stops = d3.range(0,1.01,.1).map(t=>sc(layer==="temp"?dom[0]+t*(dom[1]-dom[0]):Math.exp(Math.log(dom[0])+t*(Math.log(dom[1])-Math.log(dom[0]))))).join(",");
   lg.innerHTML = (layer==="temp"
-    ? `<span>Surface (1 m)</span><span class="num">${fmtT(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="num">${fmtT(dom[1])}</span>`
+    ? `<span>${depth ? "Eau " + DLAB[depth] : "Surface (1 m)"}</span><span class="num">${fmtT(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="num">${fmtT(dom[1])}</span>`
     : `<span>Observations</span><span class="num">${fmtN(dom[0])}</span><span class="ramp" style="background:linear-gradient(90deg,${stops})"></span><span class="num">${fmtN(dom[1])}</span>`)
     + `<span style="display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap">Baignade : ${["excellente","bonne","insuffisante","non classée"].map(q=>`<span class="${qClass(q)}" style="display:inline-flex;gap:4px;align-items:center"><svg width="9" height="9"><circle cx="4.5" cy="4.5" r="4" style="fill:var(--q)"/></svg>${q}</span>`).join("")}</span>`
     + `<span style="display:inline-flex;gap:6px;align-items:center"><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--reed)" fill-opacity=".18" stroke="var(--reed)" stroke-dasharray="2 2"/></svg>Zone sensible</span>`;
 }
 document.querySelectorAll("[data-layer]").forEach(b=>b.addEventListener("click",()=>{
   layer=b.dataset.layer; document.querySelectorAll("[data-layer]").forEach(x=>x.setAttribute("aria-pressed",x===b)); paint();}));
+document.getElementById("depth-range").addEventListener("input", e => {
+  depth = +e.target.value;
+  e.target.setAttribute("aria-valuetext", ["en surface, à 1 mètre", "à 10 mètres", "à 30 mètres"][depth]);
+  paint();
+});
 document.querySelectorAll("[data-overlay]").forEach(b=>b.addEventListener("click",()=>{
   const on = b.getAttribute("aria-pressed")!=="true"; b.setAttribute("aria-pressed",on);
   document.getElementById(b.dataset.overlay).style.display = on?"":"none";}));
