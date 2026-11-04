@@ -1,7 +1,7 @@
 // Mode hors ligne du site Le monde des vivants (accueil et atlas).
 // Les pages sont chargées depuis le réseau en priorité (pour avoir les données du jour),
 // et depuis le cache quand il n'y a pas de connexion.
-const CACHE = "mdv-v4";
+const CACHE = "mdv-v5";
 // mis en cache dès la première visite : l'atlas marche ensuite sans connexion
 const CORE = ["/", "/leman/", "/lib/d3.min.js", "/fonts/newsreader-normal-latin.woff2",
   "/fonts/newsreader-italic-latin.woff2", "/fonts/instrument-sans-normal-latin.woff2"];
@@ -29,7 +29,9 @@ self.addEventListener("fetch", e => {
   if (isPage) {
     // réseau d'abord : les données changent chaque jour
     e.respondWith(fetch(req).then(res => {
-      const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
+      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res; }
+      // erreur du serveur (503…) : on ne l'enregistre pas, et on préfère la dernière bonne page gardée
+      return caches.match(req, {ignoreSearch: true}).then(r => r || res);
     }).catch(() => caches.match(req, {ignoreSearch: true})
       .then(r => r || caches.match(url.pathname.startsWith("/leman") ? "/leman/" : "/"))));
   } else if (url.origin === location.origin || isLib) {

@@ -147,6 +147,7 @@ svg.map{display:block;width:100%;height:auto}
 .plonge-note{grid-column:1 / -1;font:italic 15px/1.35 var(--display);color:var(--muted);margin-top:4px;min-height:1.35em}
 .zone.nodata{fill-opacity:.35}
 @media (max-width:520px){.plonge-note{min-height:calc(1.35em * 3)}} /* place réservée : la carte ne saute pas pendant qu'on glisse */
+.stale{font-size:13.5px;color:var(--warn);background:var(--warn-soft);border-radius:10px;padding:8px 12px;margin:0}
 .legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;padding:12px 14px;font-size:12.5px;color:var(--muted)}
 .ramp{width:130px;height:6px;border-radius:999px}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:7px 10px;border-radius:10px;max-width:230px;transform:translate(-50%,-115%);white-space:normal}
@@ -741,7 +742,14 @@ function hideTip(){tipEl.hidden=true}
 /* ---------- layers ---------- */
 let layer = "temp", depth = 0;
 const DEPTHS = ["1", "10", "30"], DLAB = ["en surface", "à 10 m", "à 30 m"];
-const surf = id => DATA.zones[id].temp["1"]?.last;
+// pas d'eau à cette profondeur : le modèle répond, mais sans aucune valeur (à distinguer d'une panne)
+const FOND = (id, d) => { const s = DATA.zones[id].temp?.[d]; return !!s && (s.fond === true || (Array.isArray(s.val) && s.val.length > 0 && s.val.every(v => v == null))); };
+const MOIS_LONG = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const dateFr = iso => iso ? `${+iso.slice(8,10)} ${MOIS_LONG[+iso.slice(5,7)-1]} ${iso.slice(0,4)}` : "";
+const JOUR = DATA.fetched.slice(0,10);                       // jour de la dernière mise à jour du site
+const ancien = iso => !!iso && iso.slice(0,10) < JOUR;       // donnée qui n'est pas du jour (source en panne)
+const tempDate = id => { const s = DATA.zones[id].temp?.["1"]; return s?.time?.[s.time.length-1]; };
+const surf = id => DATA.zones[id].temp?.["1"]?.last;
 const tAt = id => DATA.zones[id].temp[DEPTHS[depth]]?.last;
 const fmtT = v => v==null ? "—" : v.toFixed(1).replace(".",",")+" °C";
 const tempTxt = id => fmtT(surf(id));
@@ -754,18 +762,23 @@ const NF = new Intl.NumberFormat("fr-CH"), fmtN = n => NF.format(n); // un seul 
 function layerTip(id){
   if (layer !== "temp") return `${fmtN(DATA.zones[id].total)} observations naturalistes`;
   const v = tAt(id);
-  return v == null ? `Trop peu profond ici pour une valeur ${DLAB[depth]}` : `${fmtT(v)} ${depth ? DLAB[depth] : "en surface (1 m)"}`;
+  if (v == null) return FOND(id, DEPTHS[depth]) ? `Trop peu profond ici pour une valeur ${DLAB[depth]}` : `Donnée indisponible ${DLAB[depth]}`;
+  return `${fmtT(v)} ${depth ? DLAB[depth] : "en surface (1 m)"}`;
 }
 // phrase sous le curseur : écart moyen avec la surface, là où les deux valeurs existent
 function depthNote(){
   const el = document.getElementById("depth-note");
   if (!depth) { el.textContent = "Faites glisser pour descendre dans le lac."; return; }
   const d = ids.map(id => [surf(id), tAt(id)]).filter(([a,b]) => a!=null && b!=null).map(([a,b]) => a-b);
-  const manque = ids.filter(id => tAt(id) == null).length;
-  const ecart = d.length ? d3.mean(d) : null;
-  el.textContent = (ecart == null ? "" : ecart < 0.3 ? `${DLAB[depth][0].toUpperCase() + DLAB[depth].slice(1)}, l'eau a presque la même température qu'en surface : elle est encore bien mélangée.`
-    : `${DLAB[depth][0].toUpperCase() + DLAB[depth].slice(1)}, l'eau est en moyenne ${ecart.toFixed(1).replace(".", ",")} °C plus froide qu'en surface.`)
-    + (manque ? ` Les zones pâles sont trop peu profondes pour une mesure ${DLAB[depth]}.` : "");
+  const fond = ids.filter(id => tAt(id) == null && FOND(id, DEPTHS[depth])).length;
+  const panne = ids.filter(id => tAt(id) == null && !FOND(id, DEPTHS[depth])).length;
+  const ecart = d.length ? d3.mean(d) : null, A = DLAB[depth][0].toUpperCase() + DLAB[depth].slice(1);
+  const e1 = ecart == null ? "" : Math.abs(ecart).toFixed(1).replace(".", ",");
+  el.textContent = (ecart == null ? "" : Math.abs(ecart) < 0.3 ? `${A}, l'eau a presque la même température qu'en surface : elle est bien mélangée.`
+    : ecart > 0 ? `${A}, l'eau est en moyenne ${e1} °C plus froide qu'en surface.`
+    : `${A}, l'eau est en moyenne ${e1} °C plus chaude qu'en surface : en hiver, la surface se refroidit plus vite que le fond.`)
+    + (fond ? ` Les zones pâles sont trop peu profondes pour une mesure ${DLAB[depth]}.` : "")
+    + (panne ? ` ${panne > 1 ? "Certaines zones n'ont" : "Une zone n'a"} pas de donnée ${DLAB[depth]} aujourd'hui.` : "");
 }
 function paint(){
   ids.forEach(id=>{
@@ -828,6 +841,7 @@ function select(id,tab){cur=id; if(tab) curTab=tab;
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{curTab=t.dataset.tab;renderTab()}));
 
 function spark(series){
+  if (!series || !Array.isArray(series.time) || !Array.isArray(series.val)) return `<p class="note">Données indisponibles.</p>`;
   const w=320,h=90,m={l:30,r:8,t:8,b:18};
   const pts = series.time.map((t,i)=>[new Date(t),series.val[i]]).filter(p=>p[1]!=null);
   if(pts.length<2) return "";
@@ -853,7 +867,7 @@ function spThumb(s){
 }
 function spList(arr,empty){
   if(!arr.length) return `<p class="note">${empty}</p>`;
-  return `<ul class="list">${arr.map((s,i)=>`<li class="sp"><button type="button" class="sp-btn" data-i="${i}" aria-label="Ouvrir la fiche : ${nm(s)}"><span class="iucn ${s.iucn||"LC"}" title="${IUCN[s.iucn]||"Non évaluée"}">${s.iucn||"–"}</span>${spThumb(s)}<div><div class="sp-name">${nm(s)}</div><div class="sp-sci">${s.sci}</div></div><span class="n">${fmtN(s.n)} obs.</span><span class="chev" aria-hidden="true">›</span></button></li>`).join("")}</ul>
+  return `<ul class="list">${arr.map((s,i)=>`<li class="sp"><button type="button" class="sp-btn" data-i="${i}" aria-label="Ouvrir la fiche : ${nm(s)}"><span class="iucn ${s.iucn||"NA"}" title="${IUCN[s.iucn]||"Statut non renseigné"}">${s.iucn||"–"}</span>${spThumb(s)}<div><div class="sp-name">${nm(s)}</div><div class="sp-sci">${s.sci}</div></div><span class="n">${fmtN(s.n)} obs.</span><span class="chev" aria-hidden="true">›</span></button></li>`).join("")}</ul>
   <p class="sp-hint">Touchez une espèce pour voir sa photo et apprendre à la reconnaître.</p>`;
 }
 function bindSpList(el, arr){
@@ -863,14 +877,20 @@ function renderTab(){
   document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.tab===curTab));
   const z = DATA.zones[cur], Z = ZONES[cur], el = document.getElementById("pane");
   if(curTab==="eau"){
-    const t = d => z.temp[d]?.last;
-    const diff = (t("1")!=null && t("30")!=null) ? (t("1")-t("30")).toFixed(1).replace(".",",") : null;
+    const t = d => z.temp?.[d]?.last;
+    const ec = (t("1")!=null && t("30")!=null) ? t("1")-t("30") : null, diff = ec == null ? null : Math.abs(ec).toFixed(1).replace(".",",");
+    const d1 = tempDate(cur);
+    const note30 = ec == null ? (FOND(cur, "30") ? "Cette zone est trop peu profonde à cet endroit pour une valeur à 30 m." : "Donnée indisponible à 30 m pour cette zone.")
+      : Math.abs(ec) < 0.3 ? "La température est presque la même de la surface à 30 m : l'eau est bien mélangée."
+      : ec > 0 ? `Il fait ${diff} °C de moins à 30 m qu'en surface : c'est la thermocline, une frontière invisible entre l'eau chaude et l'eau froide du fond.`
+      : `Il fait ${diff} °C de plus à 30 m qu'en surface : en hiver, la surface se refroidit plus vite que le fond.`;
     el.innerHTML = `<div class="column"><span class="water" aria-hidden="true"></span><div class="depths">
       <div class="depth"><span>en surface, à 1 m</span><b>${fmtT(t("1"))}</b></div>
       <div class="depth"><span>à 10 m</span><b>${fmtT(t("10"))}</b></div>
       <div class="depth"><span>à 30 m</span><b>${fmtT(t("30"))}</b></div></div></div>
-      <div><div class="eyebrow" style="margin-bottom:6px">La surface ces 7 derniers jours</div>${spark(z.temp["1"])}</div>
-      <p class="note">${diff?`Il fait ${diff} °C de moins à 30 m qu'en surface : c'est la thermocline, une frontière invisible entre l'eau chaude et l'eau froide du fond.`:`Cette zone est trop peu profonde à cet endroit pour une valeur à 30 m.`} Valeurs du modèle Alplakes (Eawag), relevées le ${DATA.fetchedFr}.</p>`;
+      <div><div class="eyebrow" style="margin-bottom:6px">La surface ces 7 derniers jours</div>${spark(z.temp?.["1"])}</div>
+      <p class="note">${note30} ${d1 ? `Valeurs du modèle Alplakes (Eawag) du ${dateFr(d1)}.` : ""}</p>
+      ${ancien(d1) ? `<p class="stale">La source des températures n'a pas répondu lors de la dernière mise à jour : ces valeurs ne sont pas celles du jour.</p>` : ""}`;
   } else if(curTab==="faune"){
     const c = z.counts, max = d3.max(Object.values(c));
     const lab = {oiseaux:"Oiseaux",insectes:"Insectes",plantes:"Plantes",amphibiens:"Amphibiens",mollusques:"Mollusques",poissons:"Poissons"};
@@ -910,9 +930,12 @@ document.getElementById("cal").innerHTML = `<thead><tr><th>Période sensible</th
 <tbody>${CAL.map(r=>`<tr title="${r.tip||""}"><td><b style="font-weight:600">${r.what}</b>${r.tip?`<div style="font-size:12px;color:var(--muted)">${r.tip}</div>`:""}</td>${r.m.map((v,i)=>`<td class="m ${i===nowM?"cur":""}"><span class="${v===2?"peak":v===1?"on":""}"></span></td>`).join("")}<td class="where">${r.where}</td></tr>`).join("")}</tbody>`;
 
 /* ---------- learn ---------- */
-const th = ids.map(id=>[DATA.zones[id].temp["1"]?.last, DATA.zones[id].temp["30"]?.last]).filter(([a,b])=>a!=null&&b!=null);
+const th = ids.map(id=>[DATA.zones[id].temp?.["1"]?.last, DATA.zones[id].temp?.["30"]?.last]).filter(([a,b])=>a!=null&&b!=null);
 if(th.length){document.getElementById("learn-thermo").textContent = "− "+d3.mean(th,([a,b])=>a-b).toFixed(1).replace(".",",")+" °C";}
-document.getElementById("stamp").textContent = "Données du "+DATA.fetchedFr;
+{ // date générale, avec un avertissement si une source n'a pas répondu
+  const retard = ids.some(id => ancien(tempDate(id)) || ancien(DATA.zones[id].faune_maj)) || (DATA.niveau && ancien(DATA.niveau.time));
+  document.getElementById("stamp").textContent = "Données du " + DATA.fetchedFr + (retard ? " · certaines sources n'ont pas répondu, les valeurs concernées sont plus anciennes" : "");
+}
 
 /* ---------- niveau du lac (OFEV, St-Prex) ---------- */
 if (DATA.niveau) {
@@ -959,7 +982,7 @@ function renderFiche(){
         <div class="eyebrow">${f.groupe ? esc(f.groupe) + " · " : ""}vu au bord du Léman</div>
         <h2 id="fiche-nom">${esc(name)}</h2>
         <div class="fiche-meta"><span class="sp-sci">${esc(s.sci)}</span>
-          <span><span class="iucn ${s.iucn||"LC"}">${s.iucn||"–"}</span> ${IUCN[s.iucn] || "Non évaluée"}</span>
+          <span><span class="iucn ${s.iucn||"NA"}">${s.iucn||"?"}</span> ${IUCN[s.iucn] || "Statut non renseigné"}</span>
           ${f.taille ? `<span>Taille : ${esc(f.taille)}</span>` : ""}</div>
       </header>
       ${f.reconnaitre ? `<section class="fiche-sec"><h3>Comment la reconnaître</h3><ul class="traits">${f.reconnaitre.map(t => `<li>${esc(t)}</li>`).join("")}</ul></section>` : ""}
@@ -1007,7 +1030,7 @@ function renderSuggest(){
 function context(){
   const z=DATA.zones[cur], Z=ZONES[cur];
   return `Zone sélectionnée : ${Z.name} (${Z.side}). ${Z.desc}
-Température modélisée (Alplakes) le ${DATA.fetchedFr} : 1 m ${fmtT(z.temp["1"]?.last)}, 10 m ${fmtT(z.temp["10"]?.last)}, 30 m ${fmtT(z.temp["30"]?.last)}.
+Température modélisée (Alplakes) le ${DATA.fetchedFr} : 1 m ${fmtT(z.temp?.["1"]?.last)}, 10 m ${fmtT(z.temp?.["10"]?.last)}, 30 m ${fmtT(z.temp?.["30"]?.last)}.
 Poissons observés (GBIF) : ${z.fish.map(nm).join(", ")}.
 Espèces menacées observées (UICN mondial) : ${z.threatened.filter(s=>!EXCLUDE.has(s.sci)).map(s=>nm(s)+" ("+s.iucn+")").join(", ")}.
 Pressions : ${Z.pressures.join(" ; ")}.

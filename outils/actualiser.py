@@ -103,6 +103,8 @@ def temperature(lat, lon, now):
         vals = t["variables"]["temperature"]["data"]
         r = lambda v: round(v, 2) if v is not None else None
         res[str(depth)] = {"time": t["time"][::8], "val": [r(v) for v in vals[::8]], "last": r(vals[-1])}
+        if all(v is None for v in vals):  # le modèle répond, mais il n'y a pas d'eau à cette profondeur ici
+            res[str(depth)]["fond"] = True
     return res
 
 
@@ -484,9 +486,10 @@ def main():
         z = {}
         try:
             z.update(faune(box, emblemes))
+            z["faune_maj"] = res["fetched"][:10]  # date de la dernière récupération réussie
         except Exception as e:
             problems.append(f"{zid} faune : {e}")
-            z.update({k: prev.get(k) for k in ("total", "counts", "fish", "threatened", "emblemes")})
+            z.update({k: prev.get(k) for k in ("total", "counts", "fish", "threatened", "emblemes", "faune_maj")})
         try:
             z["temp"] = temperature(lat, lon, now)
         except Exception as e:

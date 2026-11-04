@@ -243,17 +243,17 @@ def observations(res):
 
 def carte(sci, f, iucn):
     img = f'<img src="/especes/{e(f["img"])}" alt="" loading="lazy">' if f.get("img") else '<span class="noimg"></span>'
-    statut = f'<span><span class="iucn {iucn}">{iucn}</span> {IUCN.get(iucn, "Non évaluée")}</span>' if iucn in MENACEE else f'<span class="sci">{e(sci)}</span>'
+    statut = f'<span><span class="iucn {iucn or "NA"}">{iucn or "?"}</span> {IUCN.get(iucn, "Statut non renseigné")}</span>' if iucn in MENACEE else f'<span class="sci">{e(sci)}</span>'
     return f'<a class="card" href="/leman/especes/{slug(sci)}/">{img}<div><b>{e(f["nom"])}</b>{statut}</div></a>'
 
 
 def page_espece(sci, f, o, zones, voisines):
-    nom, iucn = f["nom"], (o.get("iucn") or "LC")
+    nom, iucn = f["nom"], o.get("iucn")  # pas de statut : on ne suppose pas « préoccupation mineure »
     menacee = iucn in MENACEE
     chemin = f"/leman/especes/{slug(sci)}/"
     groupe = f.get("groupe", "Espèce")
     desc = f"{nom} ({sci}) dans le Léman : comment la reconnaître, où et quand la voir"
-    desc += f", et pourquoi elle est menacée ({IUCN.get(iucn, "Non évaluée").lower()})." if menacee else "."
+    desc += f", et pourquoi elle est menacée ({IUCN.get(iucn, "Statut non renseigné").lower()})." if menacee else "."
     photo = ""
     if f.get("img"):
         credit = f'<a href="{e(f["source"])}" target="_blank" rel="noopener">{e(f.get("auteur"))}</a>' if f.get("source") else e(f.get("auteur"))
@@ -280,7 +280,7 @@ def page_espece(sci, f, o, zones, voisines):
         liens.append(f'<a href="{e(f["wiki"])}" target="_blank" rel="noopener">En savoir plus sur Wikipédia</a>')
     liens.append(f'<a href="https://www.gbif.org/species/search?q={e(sci)}" target="_blank" rel="noopener">Toutes les observations (GBIF)</a>')
     secs.append(f'<div class="links">{"".join(liens)}</div>')
-    autres = "".join(carte(s, ff, oo.get("iucn") or "LC") for s, ff, oo in voisines)
+    autres = "".join(carte(s, ff, oo.get("iucn")) for s, ff, oo in voisines)
     corps = f"""  <div class="crumbs"><a href="/leman/">Léman Vivant</a> › <a href="/leman/especes/">Espèces</a> › {e(nom)}</div>
   <article class="sp">
     <div>{photo}</div>
@@ -288,7 +288,7 @@ def page_espece(sci, f, o, zones, voisines):
       <header class="sp-head">
         <div class="eyebrow">{e(groupe)} · vu au bord du Léman</div>
         <h1>{e(nom)}</h1>
-        <div class="sp-meta"><span class="sci">{e(sci)}</span><span><span class="iucn {iucn}">{iucn}</span> {IUCN.get(iucn, "Non évaluée")}</span>{f'<span>Taille : {e(f["taille"])}</span>' if f.get("taille") else ""}</div>
+        <div class="sp-meta"><span class="sci">{e(sci)}</span><span><span class="iucn {iucn or 'NA'}">{iucn or '?'}</span> {IUCN.get(iucn, "Statut non renseigné")}</span>{f'<span>Taille : {e(f["taille"])}</span>' if f.get("taille") else ""}</div>
       </header>
       {"".join(secs)}
     </div>
@@ -313,9 +313,9 @@ def page_liste(fiches, obs):
     blocs = []
     for g in sorted(par_groupe, key=lambda g: GROUPES.index(g) if g in GROUPES else 99):
         lst = sorted(par_groupe[g], key=lambda s: fiches[s]["nom"].lower())
-        cartes = "".join(carte(s, fiches[s], obs.get(s, {}).get("iucn") or "LC") for s in lst)
+        cartes = "".join(carte(s, fiches[s], obs.get(s, {}).get("iucn")) for s in lst)
         blocs.append(f'<section class="group" id="{slug(g)}"><h2>{e(PLURIEL.get(g, g))}<small>{len(lst)}</small></h2><div class="mini">{cartes}</div></section>')
-    n_men = sum(1 for s in fiches if (obs.get(s, {}).get("iucn") or "LC") in MENACEE)
+    n_men = sum(1 for s in fiches if obs.get(s, {}).get("iucn") in MENACEE)
     corps = f"""  <div class="crumbs"><a href="/leman/">Léman Vivant</a> › Espèces</div>
   <header class="intro">
     <div class="eyebrow">Léman Vivant</div>
@@ -384,6 +384,9 @@ def semaine(res, cal):
         if len(vals) > 1:
             d = vals[-1] - vals[0]
             tend = "stable sur la semaine" if abs(d) < 0.5 else f"{'+' if d > 0 else '−'}{dec(abs(d))} °C en une semaine"
+        jour, quand = res["fetched"][:10], (t.get("time") or [""])[-1][:10]
+        if quand and quand < jour:  # la source n'a pas répondu : on le dit
+            tend = f"valeur du {int(quand[8:10])} {MOIS[int(quand[5:7]) - 1]}, source momentanément indisponible"
         tuiles.append(("Eau en surface à Lausanne", f"{dec(t['last'])} °C", tend))
     n = res.get("niveau")
     if n:
@@ -391,6 +394,8 @@ def semaine(res, cal):
         txt = "proche de la normale" if abs(ec) < 3 else f"{dec(abs(ec), 0)} cm {'au-dessus' if ec > 0 else 'au-dessous'} de la normale"
         if n.get("danger", 1) >= 2:
             txt = f"danger de crue {n['danger']}/5"
+        if n.get("time", "")[:10] and n["time"][:10] < res["fetched"][:10]:
+            txt = f"mesure du {int(n['time'][8:10])} {MOIS[int(n['time'][5:7]) - 1]}, station momentanément indisponible"
         tuiles.append(("Niveau du lac", f"{dec(n['last'], 2)} m", txt))
     mois = int(res["fetched"][5:7]) - 1
     pic = [c["what"] for c in cal if c["m"][mois] == 2] or [c["what"] for c in cal if c["m"][mois] == 1]
