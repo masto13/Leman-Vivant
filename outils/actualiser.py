@@ -102,8 +102,12 @@ def temperature(lat, lon, now):
         t = get(f"https://alplakes-api.eawag.ch/simulations/point/delft3d-flow/geneva/{start}/{end}/{depth}/{lat}/{lon}")
         vals = t["variables"]["temperature"]["data"]
         r = lambda v: round(v, 2) if v is not None else None
-        res[str(depth)] = {"time": t["time"][::8], "val": [r(v) for v in vals[::8]], "last": r(vals[-1])}
-        if all(v is None for v in vals):  # le modèle répond, mais il n'y a pas d'eau à cette profondeur ici
+        res[str(depth)] = {
+            "time": t["time"][::8], "val": [r(v) for v in vals[::8]],
+            "last": r(vals[-1]) if vals else None,
+            "last_time": t["time"][-1] if vals else None,
+        }
+        if vals and all(v is None for v in vals):  # indice d'un fond trop peu profond au point du modèle
             res[str(depth)]["fond"] = True
     return res
 
