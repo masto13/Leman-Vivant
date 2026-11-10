@@ -1,0 +1,34 @@
+# Test temporaire : quelles profondeurs le modèle Alplakes fournit-il ? (à supprimer après lecture)
+name: Test profondeurs Alplakes
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Interroger le modèle à plusieurs profondeurs (Grand-Lac au large)
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, datetime
+          now = datetime.datetime.utcnow()
+          a = (now - datetime.timedelta(days=1)).strftime("%Y%m%d0000"); b = now.strftime("%Y%m%d0000")
+          def get(u):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "leman-vivant-test"}), timeout=60) as r:
+                      return r.status, json.loads(r.read())
+              except Exception as e:
+                  return "ERREUR", str(e)[:200]
+          for lat, lon, nom in [(46.45, 6.55, "large"), (46.45, 6.82, "lavaux")]:
+              for d in [1, 30, 50, 75, 100, 150, 200, 250, 300]:
+                  s, j = get(f"https://alplakes-api.eawag.ch/simulations/point/delft3d-flow/geneva/{a}/{b}/{d}/{lat}/{lon}")
+                  if isinstance(j, dict):
+                      v = j.get("variables", {}).get("temperature", {}).get("data", [])
+                      vals = [x for x in v if x is not None]
+                      print(nom, d, "m :", s, "valeurs", len(vals), "/", len(v), "dernière", vals[-1] if vals else None, "| profondeur renvoyée :", j.get("depth"))
+                  else:
+                      print(nom, d, "m :", s, j)
+          s, j = get(f"https://alplakes-api.eawag.ch/simulations/profile/delft3d-flow/geneva/{b}/46.45/6.55")
+          print("PROFIL :", s, (json.dumps(j)[:600] if isinstance(j, dict) else j))
+          PY
