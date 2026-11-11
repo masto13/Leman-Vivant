@@ -127,6 +127,14 @@
   "source": "https://commons.wikimedia.org/wiki/File:Calidris_alpina_alpina,_Riga,_Latvia_1.jpg",
   "wiki": "https://fr.wikipedia.org/wiki/B%C3%A9casseau_variable"
  },
+ "Calidris canutus": {
+  "auteur": "Gregory Breese/U. S. Fish and Wildlife Service; posted to Flickr by U.S. Fish an",
+  "img": "calidris-canutus.jpg",
+  "licence": "Public domain",
+  "resume": "Le Bécasseau maubèche (Calidris canutus) est une espèce d'oiseaux Charadriiformes de la famille des Scolopacidae.",
+  "source": "https://commons.wikimedia.org/wiki/File:Red_knot_Delaware.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/B%C3%A9casseau_maub%C3%A8che"
+ },
  "Castor fiber": {
   "auteur": "Per Harald Olsen",
   "img": "castor-fiber.jpg",
@@ -207,6 +215,22 @@
   "resume": "La Carpe commune (Cyprinus carpio), ou Carpe, est une espèce de poissons téléostéens de la famille des cyprinidés. Le nom de « carpe » peut aussi désigner des variantes issues de la sélection au cours d'une longue histoire d'élevage, avec par exemple la carpe cuir, la carpe miroir ou la carpe koï, qui est l'une des sous-espèces de poissons les plus anciennement domestiquées. Ces variantes sont plus ovoïdes, au dos bossu et au ventre flasque, et caractérisées par des différentes écaillures.",
   "source": "https://commons.wikimedia.org/wiki/File:Common_carp.jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Cyprinus_carpio"
+ },
+ "Eliomys quercinus": {
+  "auteur": "Jctramasure",
+  "img": "eliomys-quercinus.jpg",
+  "licence": "CC BY-SA 3.0",
+  "resume": "Eliomys quercinus, le lérot, est un rongeur nocturne proche des loirs, appartenant à la famille des Gliridae.",
+  "source": "https://commons.wikimedia.org/wiki/File:L%C3%A9rot.jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Eliomys_quercinus"
+ },
+ "Emys orbicularis": {
+  "auteur": "Максим Яковлєв",
+  "img": "emys-orbicularis.jpg",
+  "licence": "CC BY-SA 4.0",
+  "resume": "La Cistude (Emys orbicularis) est une espèce de tortues de la famille des Emydidae. En français elle est également appelée Cistude d'Europe, Tortue de Brenne, Tortue des marais ou Tortue bourbeuse, ces deux dernières appellations étant ambiguës (elles peuvent désigner d'autres espèces de tortues). C'est une petite tortue d'eau douce, palustre et carnivore, d'Europe, classée « quasi-menacée » (NT) par l'Union internationale pour la conservation de la nature (UICN).",
+  "source": "https://commons.wikimedia.org/wiki/File:%D0%A7%D0%B5%D1%80%D0%B5%D0%BF%D0%B0%D1%85%D0%B0_%D0%B1%D0%BE%D0%BB%D0%BE%D1%82%D1%8F%D0%BD%D0%B0_%D1%94%D0%B2%D1%80%D0%BE%D0%BF%D0%B5%D0%B9%D1%81%D1%8C%D0%BA%D0%B0_(Emys_orbicularis).jpg",
+  "wiki": "https://fr.wikipedia.org/wiki/Cistude"
  },
  "Erinaceus europaeus": {
   "auteur": "Jörg Hempel",
@@ -512,6 +536,7 @@
   "source": "https://commons.wikimedia.org/wiki/File:European_Turtle_Dove_(Streptopelia_turtur).jpg",
   "wiki": "https://fr.wikipedia.org/wiki/Tourterelle_des_bois"
  },
+ "Theria primaria": {},
  "Tinca tinca": {
   "auteur": "Viridiflavus",
   "img": "tinca-tinca.jpg",
