@@ -3,7 +3,8 @@ name: Actualiser les données
 on:
   schedule:
     - cron: "15 4 * * *"   # chaque jour à 04:15 UTC (6 h 15 en été, 5 h 15 en hiver en Suisse)
-  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main
+    - cron: "37 9 * * *"   # secours à 09:37 UTC, car GitHub lance parfois les tâches programmées avec des heures de retard
+  workflow_dispatch:         # bouton « Run workflow » pour lancer à la main (toujours exécuté)
 
 permissions:
   contents: write
@@ -19,17 +20,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Si l'autre lancement programmé a déjà mis le site à jour aujourd'hui, on s'arrête là.
+      # Un lancement à la main (bouton « Run workflow ») passe toujours.
+      - name: Vérifier si les données du jour sont déjà là
+        id: deja
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && grep -q "\"fetched\": \"$(date -u +%Y-%m-%d)" outils/data/zones.json; then
+            echo "fait=oui" >> "$GITHUB_OUTPUT"
+            echo "Données du jour déjà présentes : rien à faire."
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.deja.outputs.fait != 'oui'
         with:
           python-version: "3.12"
 
       - name: Installer Pillow (allègement des photos)
+        if: steps.deja.outputs.fait != 'oui'
         run: pip install --quiet pillow
 
       - name: Récupérer les données et reconstruire le site
+        if: steps.deja.outputs.fait != 'oui'
         run: python3 outils/actualiser.py
 
       - name: Enregistrer les nouvelles données
+        if: steps.deja.outputs.fait != 'oui'
         run: |
           git config user.name "leman-vivant-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
